@@ -1,4 +1,7 @@
 import traer.physics.*;
+import controlP5.*;
+
+ControlP5 controlP5;
 
 final float NODE_SIZE = 10;
 final float EDGE_LENGTH = 20;
@@ -14,7 +17,18 @@ float centroidY = 0;
 
 void setup()
 {
-  size( 1280, 800 );
+  size( 800, 400 );
+  controlP5 = new ControlP5(this);
+  // add a new controller window
+  ControlWindow cw = controlP5.addControlWindow("win" ,250, 250);
+  cw.setLocation(100,100);
+  // begin a new group of auto-arranged controllers
+  ControlGroup cg = controlP5.addGroup("controls",30,30);
+  cg.moveTo(cw);
+  controlP5.begin(cg,0,10);
+  controlP5.addButton("Load_Data").linebreak();
+  controlP5.end();
+  
   smooth();
   strokeWeight( 2 );
   ellipseMode( CENTER );       
@@ -167,4 +181,8 @@ void addNode()
   makeEdgeBetween( p, q );
   p.position().set( q.position().x() + random( -1, 1 ), q.position().y() + random( -1, 1 ), 0 );
 }
+
+// link load data button to file chooser
+public void Load_Data(int v) { openFile(); }
+
 
