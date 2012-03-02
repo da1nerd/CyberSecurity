@@ -1,7 +1,8 @@
 
 
-PFont font;
+//PFont font;
 
+/* DATA STRUCTURES */
 // define lists for all entities, the links between the
 // persons and the links from cities to countries and a list for
 // the assignment of the persons to a city
@@ -9,7 +10,20 @@ ArrayList nodeArray = new ArrayList();
 ArrayList linksArray = new ArrayList();
 ArrayList peopleCityLinksArray = new ArrayList();
 
+/* METHODS */
 
+// load the data
+void load_data() {
+  String fileEntities = dataPath("Entities_Table.txt");
+  nodeArray = loadEntities(fileEntities);
+  
+  String fileLinks = dataPath("Links_Table.txt");
+  linksArray = loadConnections(fileLinks);
+  
+  String filePCLinks = dataPath("People-Cities.txt");
+  peopleCityLinksArray = loadPersonCityConnection(filePCLinks);
+}
+/*
 void setup_old() {
   size( 1200, 700 );
   
@@ -25,9 +39,11 @@ void setup_old() {
   font = loadFont("ArialMT-10.vlw");
   textFont (font);
 }
+*/
 
 // draw all nodes with their random x and y coordinates
 // on the screen and their connections
+/*
 void draw() {
   colorMode(RGB, 255);
   background (255,255,255);
@@ -58,7 +74,9 @@ void draw() {
   }
  
 }
+*/
 
+/* CLASSES */
 
 // Class holding one network node
 class Node { 

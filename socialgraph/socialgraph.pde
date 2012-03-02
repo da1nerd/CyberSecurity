@@ -4,25 +4,10 @@ ControlP5 controlP5;
 
 boolean drag = false;
 
-// PROCESSING /////////////////////////////////////
-
 void setup()
 {
-  // files
-    String fileEntities = dataPath("Entities_Table.txt");
-  nodeArray = loadEntities(fileEntities);
-  
-  String fileLinks = dataPath("Links_Table.txt");
-  linksArray = loadConnections(fileLinks);
-  
-  String filePCLinks = dataPath("People-Cities.txt");
-  peopleCityLinksArray = loadPersonCityConnection(filePCLinks);
-  
-  font = loadFont("ArialMT-10.vlw");
-  textFont (font);
-  
-  
   size( 800, 400 );
+  
   //
   // Controls
   //
@@ -35,6 +20,8 @@ void setup()
   cg.moveTo(cw);
   controlP5.begin(cg,0,10);
   controlP5.addButton("Button1").linebreak();
+  controlP5.addButton("Load_Data").linebreak();
+  //controlP5.addSlider("Min_Connections",100,200,128,10,60,100,10);
   controlP5.end();
   
   //
@@ -43,20 +30,7 @@ void setup()
   smooth();
   strokeWeight( 2 );
   ellipseMode( CENTER );       
-  
   physics = new ParticleSystem( 0, 0.1 );
-  
-  // Runge-Kutta, the default integrator is stable and snappy,
-  // but slows down quickly as you add particles.
-  // 500 particles = 7 fps on my machine
-  
-  // Try this to see how Euler is faster, but borderline unstable.
-  // 500 particles = 24 fps on my machine
-  //physics.setIntegrator( ParticleSystem.MODIFIED_EULER ); 
-  
-  // Now try this to see make it more damped, but stable.
-  //physics.setDrag( 0.2 );
-  
   
   textFont( loadFont( "SansSerif-14.vlw" ) );
   
@@ -112,4 +86,6 @@ public void Button1(int v) {
   addNode();
 }
 
-
+public void Load_Data(int v) {
+  load_data();
+}
