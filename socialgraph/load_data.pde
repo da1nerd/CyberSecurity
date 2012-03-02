@@ -10,7 +10,7 @@ ArrayList linksArray = new ArrayList();
 ArrayList peopleCityLinksArray = new ArrayList();
 
 
-void setup() {
+void setup_old() {
   size( 1200, 700 );
   
   String fileEntities = dataPath("Entities_Table.txt");

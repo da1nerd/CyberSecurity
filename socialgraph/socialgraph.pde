@@ -8,6 +8,20 @@ boolean drag = false;
 
 void setup()
 {
+  // files
+    String fileEntities = dataPath("Entities_Table.txt");
+  nodeArray = loadEntities(fileEntities);
+  
+  String fileLinks = dataPath("Links_Table.txt");
+  linksArray = loadConnections(fileLinks);
+  
+  String filePCLinks = dataPath("People-Cities.txt");
+  peopleCityLinksArray = loadPersonCityConnection(filePCLinks);
+  
+  font = loadFont("ArialMT-10.vlw");
+  textFont (font);
+  
+  
   size( 800, 400 );
   //
   // Controls
