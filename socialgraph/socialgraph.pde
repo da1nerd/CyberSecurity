@@ -8,6 +8,8 @@ void setup()
 {
   size( 800, 400 );
   
+  connectDB("socialgraph.db");
+  
   //
   // Controls
   //
@@ -88,4 +90,5 @@ public void Button1(int v) {
 
 public void Load_Data(int v) {
   load_data();
+  dumpDB();
 }

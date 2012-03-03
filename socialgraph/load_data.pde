@@ -23,23 +23,7 @@ void load_data() {
   String filePCLinks = dataPath("People-Cities.txt");
   peopleCityLinksArray = loadPersonCityConnection(filePCLinks);
 }
-/*
-void setup_old() {
-  size( 1200, 700 );
-  
-  String fileEntities = dataPath("Entities_Table.txt");
-  nodeArray = loadEntities(fileEntities);
-  
-  String fileLinks = dataPath("Links_Table.txt");
-  linksArray = loadConnections(fileLinks);
-  
-  String filePCLinks = dataPath("People-Cities.txt");
-  peopleCityLinksArray = loadPersonCityConnection(filePCLinks);
-  
-  font = loadFont("ArialMT-10.vlw");
-  textFont (font);
-}
-*/
+
 
 // draw all nodes with their random x and y coordinates
 // on the screen and their connections
@@ -159,7 +143,18 @@ ArrayList loadEntities(String filename)
         String name = pieces[1];
         String type = pieces[2];
         
-        entities.add( new Node(id, name, type) );
+       // entities.add( new Node(id, name, type) );
+        
+        // insert entities into database
+        if(type.equals("person")) {
+          insertPerson(name, id);
+        } else if(type.equals("city")) {
+          insertCity(name, id);
+        } else if(type.equals("country")) {
+          insertCountry(name, id);
+        } else {
+          println("INVALID ENTITY TYPE " + type);
+        }
       }
       
       LineCount += 1;
@@ -195,7 +190,10 @@ ArrayList loadConnections(String filename)
         int node1 = Integer.parseInt(pieces[0]);
         int node2 = Integer.parseInt(pieces[1]);
         
-        connections.add( new Connection(node1, node2) );
+      //  connections.add( new Connection(node1, node2) );
+        
+        // insert connections into database
+        insertPersonPersonLnk(node1, node2);
       }
       
       LineCount += 1;
@@ -231,9 +229,13 @@ ArrayList loadPersonCityConnection(String filename)
         int person = Integer.parseInt(pieces[0]);
         String city = pieces[1];
         
-        connections.add( new PCConnection(person, city) );
+       // connections.add( new PCConnection(person, city) );
         
-        println(LineCount + ": " + person + ", " + city);
+       // println(LineCount + ": " + person + ", " + city);
+        
+        // insert the city links into the database
+        int city_id = getCityByName(city);
+        insertPersonCityLink(person, city_id);
       }
       
       LineCount += 1;
