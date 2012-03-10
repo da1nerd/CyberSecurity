@@ -14,116 +14,19 @@ ArrayList peopleCityLinksArray = new ArrayList();
 
 // load the data
 void load_data() {
-  String fileEntities = dataPath("Entities_Table.txt");
-  nodeArray = loadEntities(fileEntities);
+  loadEntities(dataPath("Entities_Table.txt"));
+  println("loaded entities");
   
-  String fileLinks = dataPath("Links_Table.txt");
-  linksArray = loadConnections(fileLinks);
+  loadConnections(dataPath("Links_Table.txt"));
+  println("loaded connections");
   
-  String filePCLinks = dataPath("People-Cities.txt");
-  peopleCityLinksArray = loadPersonCityConnection(filePCLinks);
+  loadPersonCityConnection(dataPath("People-Cities.txt"));
+  println("loaded links");
 }
-
-
-// draw all nodes with their random x and y coordinates
-// on the screen and their connections
-/*
-void draw() {
-  colorMode(RGB, 255);
-  background (255,255,255);
-  
-  // draw nodes
-  colorMode(HSB, 100);
-  for(int i = 0; i < nodeArray.size(); ++i)
-  {
-    Node node = (Node)nodeArray.get(i);
-    
-    fill(i%100, 100, 100);
-    stroke(i%100, 100, 100);
-    
-    ellipse(node.x, node.y, 3, 3);
-    //text(node._name, node.x, node.y);
-  }
-  
-  // draw connections
-  colorMode(RGB, 256);
-  for(int i = 0; i < linksArray.size(); ++i)
-  {
-    Connection con = (Connection)linksArray.get(i);
-    Node node1 = (Node)nodeArray.get(con._node1-1);
-    Node node2 = (Node)nodeArray.get(con._node2-1);
-    
-    stroke(10, 10, 10, 100);
-    line(node1.x, node1.y, node2.x, node2.y);
-  }
- 
-}
-*/
-
-/* CLASSES */
-
-// Class holding one network node
-class Node { 
-  int _id;
-  String _name;
-  String _type;
-  int x, y;
-  boolean enabled;
-
-  Node(int id, String name, String type) { 
-    _id = id;
-    _name = name;
-    _type = type;
-    
-    enabled = true;
-    
-    // Test: place randomly to x and y
-    x = (int)random(1200);
-    y = (int)random(700);
-  }
-}
-
-// Class to define one connection between persons or 
-// assign a city to a country
-class Connection {
-  int _node1;
-  int _node2;
-  boolean enabled;
- 
-  Connection(int node1, int node2)
-  {
-    _node1 = node1;
-    _node2 = node2;
-    
-    enabled = true;
-  } 
-}
-
-// Class to define one connection
-class PCConnection {
-  int _pnode;
-  int _cnode;
-  String _cityName;
-  boolean enabled;
- 
-  PCConnection(int person, String cityName)
-  {
-    _cityName = cityName;
-    _pnode = person;
-    
-    // TODO: extract the node number of the city
-    _cnode = 1;
-    
-    enabled = true;
-  } 
-}
-
 
 // Load all entities and return an ArrayList with nodes
-ArrayList loadEntities(String filename)
+void loadEntities(String filename)
 {
-  
-  ArrayList entities = new ArrayList();
   try {
     BufferedReader reader = new BufferedReader (new FileReader (filename)) ;
     
@@ -143,15 +46,15 @@ ArrayList loadEntities(String filename)
         String name = pieces[1];
         String type = pieces[2];
         
-       // entities.add( new Node(id, name, type) );
+      //  println(id + ":" + name + ":"+ type);
         
         // insert entities into database
         if(type.equals("person")) {
-          insertPerson(name, id);
+          dbm.insertPerson(name, id);
         } else if(type.equals("city")) {
-          insertCity(name, id);
+          dbm.insertCity(name, id);
         } else if(type.equals("country")) {
-          insertCountry(name, id);
+          dbm.insertCountry(name, id);
         } else {
           println("INVALID ENTITY TYPE " + type);
         }
@@ -163,15 +66,11 @@ ArrayList loadEntities(String filename)
     println("--file error-- ");
     e.printStackTrace();
   }
-  
-  return entities;
 }
 
 // Load all connections and return them in an ArrayList
-ArrayList loadConnections(String filename)
+void loadConnections(String filename)
 {
-  
-  ArrayList connections = new ArrayList();
   try {
     BufferedReader reader = new BufferedReader (new FileReader (filename)) ;
     
@@ -190,10 +89,14 @@ ArrayList loadConnections(String filename)
         int node1 = Integer.parseInt(pieces[0]);
         int node2 = Integer.parseInt(pieces[1]);
         
-      //  connections.add( new Connection(node1, node2) );
-        
-        // insert connections into database
-        insertPersonPersonLnk(node1, node2);
+        // connections file contains both person to person connections and city to country links.
+        if(dbm.isCity(node1)) {
+          // insert city country links into database
+          dbm.insertCityCountryLink(node1, node2);
+        } else {
+          // insert person connections into database
+          dbm.insertPersonPersonLnk(node1, node2);
+        }
       }
       
       LineCount += 1;
@@ -202,15 +105,11 @@ ArrayList loadConnections(String filename)
     println("--file error-- ");
     e.printStackTrace();
   }
-  
-  return connections;
 }
 
 // Load all person-city connections and return them in an ArrayList
-ArrayList loadPersonCityConnection(String filename)
+void loadPersonCityConnection(String filename)
 {
-  
-  ArrayList connections = new ArrayList();
   try {
     BufferedReader reader = new BufferedReader (new FileReader (filename)) ;
     
@@ -229,13 +128,9 @@ ArrayList loadPersonCityConnection(String filename)
         int person = Integer.parseInt(pieces[0]);
         String city = pieces[1];
         
-       // connections.add( new PCConnection(person, city) );
-        
-       // println(LineCount + ": " + person + ", " + city);
-        
         // insert the city links into the database
-        int city_id = getCityByName(city);
-        insertPersonCityLink(person, city_id);
+        int city_id = dbm.getCityByName(city);
+        dbm.insertPersonCityLink(person, city_id);
       }
       
       LineCount += 1;
@@ -245,5 +140,5 @@ ArrayList loadPersonCityConnection(String filename)
     e.printStackTrace();
   }
   
-  return connections;
+  /* Filters */
 }

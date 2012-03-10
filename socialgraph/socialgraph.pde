@@ -1,6 +1,7 @@
 import controlP5.*;
 
 ControlP5 controlP5;
+DBManager dbm = new DBManager(this);
 
 boolean drag = false;
 
@@ -8,7 +9,8 @@ void setup()
 {
   size( 800, 400 );
   
-  connectDB("socialgraph.db");
+  dbm.connect(dataPath("socialgraph.sqlite"), true);
+  
   
   //
   // Controls
@@ -90,5 +92,4 @@ public void Button1(int v) {
 
 public void Load_Data(int v) {
   load_data();
-  dumpDB();
 }
