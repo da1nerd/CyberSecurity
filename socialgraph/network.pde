@@ -62,7 +62,7 @@ void addRandomNode() {
       }
       
     } while(again);
-    println("Link " + i + " to " + link_to);
+    //println("Link " + i + " to " + link_to);
     links.add(link_to);
   }
   
@@ -73,16 +73,21 @@ void addRandomNode() {
 // Class holding the whole network
 //
 class Network {
+ 
+  final color NODE_COLOR = color(150);
+  final color ACTIVE_NODE_COLOR = color(255, 60, 60);
+  final color SELECTED_NODE_COLOR = color(255, 0, 0);
+  
+  final color CONNECTION_COLOR = color(0, 0, 0);
   
   ArrayList persons = new ArrayList<Person>();
-  int selectedPerson = -1;
     
   Network() {
     clearNetwork();
   }
   
   void addPerson(Person pers) {
-    println("add connections");
+    //println("add connections");
     persons.add( pers );
     
     // add particle
@@ -96,7 +101,7 @@ class Network {
       {
         if( (Integer)((pers._connections).get(i)) == ((Person)persons.get(j))._id )
         {
-          println("add connections: " +  pers._id + " to " + ((Person)persons.get(j))._id);
+          //println("add connections: " +  pers._id + " to " + ((Person)persons.get(j))._id);
           addSpacersToNode( pers._p, ((Person)persons.get(j))._p );
           makeEdgeBetween( pers._p, ((Person)persons.get(j))._p );
         }
@@ -129,6 +134,76 @@ class Network {
     drawParticles(click, mx_raw, my_raw);    
     popMatrix();
   }
+  
+  int checkNodeHit(float mx_raw, float my_raw) {
+    
+    // adjust mouse coordinates to match particle coordinates
+    float mx = (mx_raw - width/2.0) / scale + centroidX;
+    float my = (my_raw - height/2.0) / scale + centroidY;
+    float adjustedTollerance = tollerance  * scale + NODE_SIZE/ (2.0 * scale);
+    
+    for ( int i = 0; i < persons.size(); ++i )
+    {
+      Person pers = (Person)persons.get(i);
+      Particle v = pers.getParticle();
+
+      if(abs(v.position().x() - mx) < adjustedTollerance  && 
+         abs(v.position().y() - my) < adjustedTollerance)
+      {
+        return i;
+      }
+    }
+    return -1;
+  }
+  
+  
+  void selectNode(boolean ctrl, float mx_raw, float my_raw) {
+        
+    if(!ctrl)
+      resetSelection();
+
+    int i = checkNodeHit(mx_raw, my_raw);
+    if( i >= 0) ((Person)persons.get(i)).selected = true;
+  }
+  
+  int last_selection = -1;
+  void selectDragNode(float mx_raw, float my_raw) {
+    int i = checkNodeHit(mx_raw, my_raw);
+    if( i >= 0) ((Person)persons.get(i)).getParticle().makeFixed();
+    last_selection = i;
+  }
+  
+  void dragNode(float mx_raw, float my_raw) {
+    
+    // adjust mouse coordinates to match particle coordinates
+    float mx = (mx_raw - width/2.0) / scale + centroidX;
+    float my = (my_raw - height/2.0) / scale + centroidY;
+    float adjustedTollerance = tollerance  * scale + NODE_SIZE/ (2.0 * scale);
+    
+    if(last_selection >= 0)
+    {
+      Person pers = (Person)persons.get(last_selection);
+      Particle v = pers.getParticle();
+      v.position().set(mx, my, 0);
+    }
+  }
+  
+  void releaseDragNode() {
+      
+    if(last_selection >= 0)
+    {
+      Person pers = (Person)persons.get(last_selection);  
+      Particle v = pers.getParticle();
+      v.makeFree();
+    }
+    
+    last_selection = -1;
+  }
+  
+  void resetSelection() {
+    for ( int i = 0; i < persons.size(); ++i )
+      ((Person)persons.get(i)).selected = false;
+  }
 
  
   
@@ -148,9 +223,10 @@ class Network {
   void drawParticles(boolean click, float mx_raw, float my_raw)
   { 
     
-      
-    // draw edges 
-    stroke( 0 );
+    //
+    // draw edges
+    //
+    stroke( CONNECTION_COLOR );
     strokeWeight( 2 );
     beginShape( LINES );
     for ( int i = 0; i < physics.numberOfSprings(); ++i )
@@ -162,10 +238,10 @@ class Network {
       vertex( b.position().x(), b.position().y() );
     }
     endShape();
-    
-    
-    
-    
+   
+    //
+    // draw nodes
+    //
     ellipseMode( CENTER );
     
     // adjust mouse coordinates to match particle coordinates
@@ -173,11 +249,8 @@ class Network {
     float my = (my_raw - height/2.0) / scale + centroidY;
     float adjustedTollerance = tollerance  * scale + NODE_SIZE/ (2.0 * scale);
     
-    if(click == true) {selectedPerson = -1;}
-    
     // draw vertices
     fill( 160 );
-    
     for ( int i = 0; i < persons.size(); ++i )
     {
       Person pers = (Person)persons.get(i);
@@ -189,36 +262,14 @@ class Network {
       {
         strokeWeight(1);
         stroke(255, 0, 0);
-        if(click == true)
-        {
-          selectedPerson = pers.getID();
-          pers.selected = true;
-        }
       }
       
-//      if(click == true) {
-//        //println(selectedParticle + " - " + abs(v.position().x() - mx) + " : " + abs(v.position().y() - my) + " _ " + adjustedTollerance);
-//        if(selectedParticle == -1) {
-//          // look for the particle
-//          else {
-//            
-//           // println("cendroidx: " + centroidX + " centroidY: " + centroidY + " mousex: " + mx + " mousey: " + my + " nodex: " + v.position().x() + " nodey: " + v.position().y());
-//        }
-//        } else if(selectedParticle == i) {
-//          // update position of selected particle
-//         // println(v.isFixed());
-//          //v.position().set( mx , my, 0 );
-//        }
-//      } else if(drag == false && selectedParticle != -1) {
-//        // reset selected particle
-//      //  physics.getParticle(selectedParticle).makeFree();
-//       // selectedParticle = -1;
-//      } 
-      
-      if(selectedPerson == pers.getID()) {
-        fill(255,0,0);
+      if( i == last_selection ) {
+        fill( ACTIVE_NODE_COLOR );
+      } else if( pers.selected ) {
+        fill( SELECTED_NODE_COLOR );
       } else {
-        fill(150);
+        fill( NODE_COLOR );
       }
       
       ellipse( v.position().x(), v.position().y(), NODE_SIZE, NODE_SIZE );
@@ -254,7 +305,6 @@ class Network {
       scale = width/(deltaX+50);
       
     scale = scale > 4 ? 4 : scale;
-    //println("scale = " + scale);
   }
   
   void addSpacersToNode( Particle p, Particle r )

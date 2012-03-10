@@ -2,6 +2,7 @@ import controlP5.*;
 
 ControlP5 controlP5;
 
+boolean ctrl_pressed = false;
 boolean drag = false;
 
 Network network;
@@ -39,22 +40,30 @@ void draw()
 {
   background( 255 );
   fill( 0 );
-  //text( "" + physics.numberOfParticles() + " PARTICLES\n" + (int)frameRate + " FPS", 10, 20 );
+  text( "" + network.physics.numberOfParticles() + " PARTICLES\n" + (int)frameRate + " FPS", 10, 20 );
 
   network.drawNetwork(drag, mouseX, mouseY);  
 }
 
 void mousePressed()
 {
+  if (mouseEvent.getClickCount() == 2) {
+    network.selectNode(ctrl_pressed, mouseX, mouseY);
+  } else {
+    network.selectDragNode(mouseX, mouseY);
+  }
+  
   drag = true;
 }
 
 void mouseDragged()
 {
-  drag = true;
+  if(drag)
+    network.dragNode(mouseX, mouseY);
 }
 
 void mouseReleased() {
+  network.releaseDragNode();
   drag = false;
 }
 
@@ -71,6 +80,19 @@ void keyPressed()
     addRandomNode();
     return;
   }
+
+  if ( key == CODED ) {
+    if ( keyCode == CONTROL ) {
+      ctrl_pressed = true;
+    } 
+  }
+  return;
+}
+
+
+void keyReleased()
+{
+  ctrl_pressed = false;
 }
 
 // link load data button to file chooser
