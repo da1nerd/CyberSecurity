@@ -4,9 +4,11 @@ ControlP5 controlP5;
 
 boolean drag = false;
 
+Network network;
+
 void setup()
 {
-  size( 800, 400 );
+  size( 800, 600 );
   
   connectDB("socialgraph.db");
   
@@ -26,32 +28,20 @@ void setup()
   //controlP5.addSlider("Min_Connections",100,200,128,10,60,100,10);
   controlP5.end();
   
-  //
-  // Physics
-  //
+  network = new Network();
+  createDummyNetwork();
+  
   smooth();
-  strokeWeight( 2 );
-  ellipseMode( CENTER );       
-  physics = new ParticleSystem( 0, 0.1 );
-  
   textFont( loadFont( "SansSerif-14.vlw" ) );
-  
-  initializeNetwork();
 }
 
 void draw()
 {
-  physics.tick(); 
-  if ( physics.numberOfParticles() > 1 )
-    updateCentroid();
   background( 255 );
   fill( 0 );
-  text( "" + physics.numberOfParticles() + " PARTICLES\n" + (int)frameRate + " FPS", 10, 20 );
-  translate( width/2 , height/2 );
-  scale( scale );
-  translate( -centroidX, -centroidY );
- 
-  drawNetwork(drag, mouseX, mouseY);  
+  //text( "" + physics.numberOfParticles() + " PARTICLES\n" + (int)frameRate + " FPS", 10, 20 );
+
+  network.drawNetwork(drag, mouseX, mouseY);  
 }
 
 void mousePressed()
@@ -72,23 +62,23 @@ void keyPressed()
 {
   if ( key == 'c' )
   {
-    initializeNetwork();
+    createDummyNetwork();
     return;
   }
   
   if ( key == ' ' )
   {
-    addNode();
+    addRandomNode();
     return;
   }
 }
 
 // link load data button to file chooser
-public void Button1(int v) {  
-  addNode();
+public void Button1(int v) {
+  addRandomNode();
 }
 
 public void Load_Data(int v) {
   load_data();
-  dumpDB();
+  //dumpDB();
 }
