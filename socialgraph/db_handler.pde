@@ -81,12 +81,12 @@ class DBManager {
    */
   private void initDB(MySQL database) { //SQLite database) {
     println("Initializing database: " + database.database);
-    database.execute("DROP TABLE person");
-    database.execute("DROP TABLE city");
-    database.execute("DROP TABLE country");
-    database.execute("DROP TABLE person_city_link");
-    database.execute("DROP TABLE person_person_link");
-    database.execute("DROP TABLE city_country_link");
+    database.execute("DROP TABLE IF EXISTS person");
+    database.execute("DROP TABLE IF EXISTS city");
+    database.execute("DROP TABLE IF EXISTS country");
+    database.execute("DROP TABLE IF EXISTS person_city_link");
+    database.execute("DROP TABLE IF EXISTS person_person_link");
+    database.execute("DROP TABLE IF EXISTS city_country_link");
     database.execute("CREATE TABLE IF NOT EXISTS person (id INT, name VARCHAR(60));");
     database.execute("CREATE TABLE IF NOT EXISTS city (id INT, name  VARCHAR(60));");
     database.execute("CREATE TABLE IF NOT EXISTS country (id INT, name  VARCHAR(60));");
