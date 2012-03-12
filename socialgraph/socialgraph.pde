@@ -3,11 +3,14 @@ import controlP5.*;
 ControlP5 controlP5;
 DBManager dbm = new DBManager(this);
 
+boolean ctrl_pressed = false;
 boolean drag = false;
+
+Network network;
 
 void setup()
 {
-  size( 800, 400 );
+  size( 800, 600 );
   
   dbm.connect(dataPath("socialgraph.sqlite"), true);
   
@@ -28,45 +31,41 @@ void setup()
   //controlP5.addSlider("Min_Connections",100,200,128,10,60,100,10);
   controlP5.end();
   
-  //
-  // Physics
-  //
+  network = new Network();
+  createDummyNetwork();
+  
   smooth();
-  strokeWeight( 2 );
-  ellipseMode( CENTER );       
-  physics = new ParticleSystem( 0, 0.1 );
-  
   textFont( loadFont( "SansSerif-14.vlw" ) );
-  
-  initializeNetwork();
 }
 
 void draw()
 {
-  physics.tick(); 
-  if ( physics.numberOfParticles() > 1 )
-    updateCentroid();
   background( 255 );
   fill( 0 );
-  text( "" + physics.numberOfParticles() + " PARTICLES\n" + (int)frameRate + " FPS", 10, 20 );
-  translate( width/2 , height/2 );
-  scale( scale );
-  translate( -centroidX, -centroidY );
- 
-  drawNetwork(drag, mouseX, mouseY);  
+  text( "" + network.physics.numberOfParticles() + " PARTICLES\n" + (int)frameRate + " FPS", 10, 20 );
+
+  network.drawNetwork(drag, mouseX, mouseY);  
 }
 
 void mousePressed()
 {
+  if (mouseEvent.getClickCount() == 2) {
+    network.selectNode(ctrl_pressed, mouseX, mouseY);
+  } else {
+    network.selectDragNode(mouseX, mouseY);
+  }
+  
   drag = true;
 }
 
 void mouseDragged()
 {
-  drag = true;
+  if(drag)
+    network.dragNode(mouseX, mouseY);
 }
 
 void mouseReleased() {
+  network.releaseDragNode();
   drag = false;
 }
 
@@ -74,20 +73,32 @@ void keyPressed()
 {
   if ( key == 'c' )
   {
-    initializeNetwork();
+    createDummyNetwork();
     return;
   }
   
   if ( key == ' ' )
   {
-    addNode();
+    addRandomNode();
     return;
   }
+
+  if ( key == CODED ) {
+    if ( keyCode == CONTROL ) {
+      ctrl_pressed = true;
+    } 
+  }
+  return;
 }
 
-// link load data button to file chooser
-public void Button1(int v) {  
-  addNode();
+
+void keyReleased()
+{
+  ctrl_pressed = false;
+}
+
+public void Button1(int v) {
+  addRandomNode();
 }
 
 public void Load_Data(int v) {
