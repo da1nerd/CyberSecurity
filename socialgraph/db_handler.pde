@@ -143,11 +143,11 @@ class DBManager {
     return -1;
   }
   
-  ArrayList peopleWithMinimumConnections(int minCount) {
-    ArrayList<int> tmpList = new ArrayList<int>();
+  ArrayList<Integer> peopleWithMinimumConnections(int minCount) {
+    ArrayList<Integer> tmpList = new ArrayList<Integer>();
     db.query("SELECT person_id, count FROM (SELECT person_id, COUNT(contact_id) as 'count' FROM person_person_link GROUP BY person_id) WHERE count >= " + minCount);
     while(db.next()) {
-      tmpList.add(db.getInt("person_id"); 
+      tmpList.add(db.getInt("person_id")); 
     }
     return tmpList;
   }
