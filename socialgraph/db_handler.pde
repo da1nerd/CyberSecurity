@@ -24,7 +24,7 @@ class DBManager {
     return connect(db_path, false);
   }
   
-  /* connect to a database. set rebuild to true start from scratch.
+  /* connect to a database. set rebuild to true start from scratch. (rebuild takes about 6 minutes)
    * overload
    */
   Boolean connect(String db_path, Boolean rebuild) {
@@ -143,22 +143,59 @@ class DBManager {
     return -1;
   }
   
-  ArrayList<Integer> peopleWithMinimumConnections(int minCount) {
-    ArrayList<Integer> tmpList = new ArrayList<Integer>();
-    db.query("SELECT person_id, count FROM (SELECT person_id, COUNT(contact_id) as 'count' FROM person_person_link GROUP BY person_id) WHERE count >= " + minCount);
-    while(db.next()) {
-      tmpList.add(db.getInt("person_id")); 
-    }
-    return tmpList;
-  }
-  // Filters
-  
-  ArrayList filter(int total_degree, int previous_degree, int matches) {
-    // TODO: look up previous data set. (not completely efficient to do this each time but it will work for now.
-    // TOOD: look up people that have the minimum degree.
+  // return a list of people that have at least total_degree connections.
+  ArrayList<Person> peopleWithConnections(int min_degree, int max_degree, Boolean exhaustive) {
+    ArrayList<Person> personList = new ArrayList<Person>();
+    ArrayList<Integer> contactList = new ArrayList<Integer>();
+    int currPerson = -1;
+    String currName = "";
     
-    db.query("SELECT * FROM 'person' ");
-    return new ArrayList();
+    if(exhaustive) {
+      println("performing exhaustive query");
+      // this takes a long time because we collect all of their connections
+      db.query("SELECT pcount.person_id, p.name, ppl.contact_id FROM ("
+              + "SELECT person_id, COUNT(contact_id) as 'count' FROM person_person_link "
+              + "GROUP BY person_id"
+              + ") AS pcount "
+              + "INNER JOIN person_person_link as ppl ON ppl.person_id = pcount.person_id "
+              + "INNER JOIN person as p ON p.id = pcount.person_id "
+              + "WHERE count >= " + min_degree + " AND count <= " + max_degree);
+    } else {
+      println("performing quick query");
+      // this is faster because we only select the local connections   
+      db.query("SELECT person_id, person.name AS 'name', local_connections.contact_id FROM ("
+            + "SELECT pcount.person_id AS 'person_id', ppl.contact_id AS 'contact_id' FROM ("
+            + "SELECT person_id, COUNT(contact_id) as 'count' FROM person_person_link "
+            + "GROUP BY person_id"
+            + ") as pcount "
+            + "INNER JOIN person_person_link as ppl ON ppl.person_id = pcount.person_id "
+            + "WHERE pcount.count >= " + min_degree + " AND pcount.count <= " + max_degree + " "
+            + "INTERSECT "
+            + "SELECT pfilter.person_id, contact_filter.contact_id FROM ("
+            + "SELECT person_id as 'contact_id', COUNT(contact_id) as 'count' FROM person_person_link "
+            + "GROUP BY person_id"
+            + ") AS contact_filter "
+            + "INNER JOIN person_person_link as pfilter on pfilter.contact_id = contact_filter.contact_id "
+            + "WHERE contact_filter.count >= " + min_degree + " AND contact_filter.count <= " + max_degree
+            + ") AS local_connections "
+            + "INNER JOIN person ON person.id = local_connections.person_id ");
+    }
+    
+    while(db.next()) {
+      // init and new person
+      if(currPerson == -1 || currPerson != db.getInt("person_id")) {
+        // just a new person
+        if(currPerson != -1 && currPerson != db.getInt("person_id")) {
+          personList.add(new Person(currPerson, currName, contactList));
+        }
+        currPerson = db.getInt("person_id");
+        currName = db.getString("name");
+        contactList = new ArrayList<Integer>();
+        println("loading " + currName);
+      }
+      // build the contact list
+      contactList.add(db.getInt("contact_id"));
+    }  
+    return personList;
   }
-  
 }

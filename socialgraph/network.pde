@@ -33,7 +33,14 @@ public class Person {
 //
 void createDummyNetwork() {
   network.clearNetwork();
-    
+  Iterator itr = dbm.peopleWithConnections(30,40, false).iterator();
+  
+  while(itr.hasNext()) {
+    network.addPerson((Person)itr.next());
+  }
+  
+  
+ /*   
   network.addPerson( new Person(1, "aaa", new ArrayList( Arrays.asList(2, 3) ) ) );
   network.addPerson( new Person(2, "bbb", new ArrayList( Arrays.asList(1) ) ) );
   network.addPerson( new Person(3, "ccc", new ArrayList( Arrays.asList(2, 1) ) ) );
@@ -41,6 +48,7 @@ void createDummyNetwork() {
   network.addPerson( new Person(4, "ddd", new ArrayList( Arrays.asList(6) ) ) );
   network.addPerson( new Person(5, "ddd", new ArrayList( Arrays.asList(3,4,5) ) ) );
   network.addPerson( new Person(6, "ddd", new ArrayList( Arrays.asList(1) ) ) );
+  */
 }
 
 void addRandomNode() {
@@ -87,7 +95,6 @@ class Network {
   }
   
   void addPerson(Person pers) {
-    //println("add connections");
     persons.add( pers );
     
     // add particle

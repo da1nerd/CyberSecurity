@@ -1,19 +1,9 @@
 
 
-//PFont font;
-
-/* DATA STRUCTURES */
-// define lists for all entities, the links between the
-// persons and the links from cities to countries and a list for
-// the assignment of the persons to a city
-ArrayList nodeArray = new ArrayList();
-ArrayList linksArray = new ArrayList();
-ArrayList peopleCityLinksArray = new ArrayList();
-
-/* METHODS */
+// handles importing raw file data into the database
 
 // load the data
-void load_data() {
+public void load_data() {
   loadEntities(dataPath("Entities_Table.txt"));
   println("loaded entities");
   
@@ -25,7 +15,7 @@ void load_data() {
 }
 
 // Load all entities and return an ArrayList with nodes
-void loadEntities(String filename)
+private void loadEntities(String filename)
 {
   try {
     BufferedReader reader = new BufferedReader (new FileReader (filename)) ;
@@ -69,7 +59,7 @@ void loadEntities(String filename)
 }
 
 // Load all connections and return them in an ArrayList
-void loadConnections(String filename)
+private void loadConnections(String filename)
 {
   try {
     BufferedReader reader = new BufferedReader (new FileReader (filename)) ;
@@ -108,7 +98,7 @@ void loadConnections(String filename)
 }
 
 // Load all person-city connections and return them in an ArrayList
-void loadPersonCityConnection(String filename)
+private void loadPersonCityConnection(String filename)
 {
   try {
     BufferedReader reader = new BufferedReader (new FileReader (filename)) ;
