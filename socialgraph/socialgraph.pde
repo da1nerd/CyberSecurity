@@ -12,7 +12,7 @@ void setup()
 {
   size( 800, 600 );
   
-  dbm.connect(dataPath("socialgraph.sqlite"));
+  dbm.connect(dataPath("socialgraph.mysql"));
   
   
   //

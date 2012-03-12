@@ -33,7 +33,7 @@ public class Person {
 //
 void createDummyNetwork() {
   network.clearNetwork();
-  Iterator itr = dbm.peopleWithConnections(30,40, false).iterator();
+  Iterator itr = dbm.peopleWithConnections(25,35, false).iterator();
   
   while(itr.hasNext()) {
     network.addPerson((Person)itr.next());

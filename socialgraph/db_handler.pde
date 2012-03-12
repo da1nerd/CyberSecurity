@@ -8,7 +8,7 @@ class DBManager {
   import de.bezier.data.sql.*;
   
   PApplet parent;
-  private SQLite db;
+  private MySQL db; //SQLite db;
   
   /* constructor
    *
@@ -56,7 +56,7 @@ class DBManager {
     }
     
     // open database file
-    db = new SQLite( parent , db_path ); 
+    db = new MySQL(parent, "localhost", "socialgraph", "root", ""); //db = new SQLite( parent , db_path ); 
     if ( db.connect() )
     {
         // reload the database if nessesary
@@ -79,42 +79,48 @@ class DBManager {
   /* initialize a database
    *
    */
-  private void initDB(SQLite database) {
+  private void initDB(MySQL database) { //SQLite database) {
     println("Initializing database: " + database.database);
-    database.execute("CREATE TABLE 'person' ('id' INTEGER, 'name' TEXT);");
-    database.execute("CREATE TABLE 'city' ('id' INTEGER, 'name' TEXT);");
-    database.execute("CREATE TABLE 'country' ('id' INTEGER, 'name' TEXT);");
-    database.execute("CREATE TABLE 'person_city_link' ('person_id' INTEGER, 'city_id' INTEGER, FOREIGN KEY(person_id) REFERENCES person(id), FOREIGN KEY(city_id) REFERENCES city(id));");
-    database.execute("CREATE TABLE 'person_person_link' ('person_id' INTEGER, 'contact_id' INTEGER, FOREIGN KEY(person_id) REFERENCES person(id), FOREIGN KEY(contact_id) REFERENCES person(id));");
-    database.execute("CREATE TABLE 'city_country_link' ('city_id' INTEGER, 'country_id' INTEGER, FOREIGN KEY(city_id) REFERENCES city(id), FOREIGN KEY(country_id) REFERENCES country(id));");
+    database.execute("DROP TABLE person");
+    database.execute("DROP TABLE city");
+    database.execute("DROP TABLE country");
+    database.execute("DROP TABLE person_city_link");
+    database.execute("DROP TABLE person_person_link");
+    database.execute("DROP TABLE city_country_link");
+    database.execute("CREATE TABLE IF NOT EXISTS person (id INT, name VARCHAR(60));");
+    database.execute("CREATE TABLE IF NOT EXISTS city (id INT, name  VARCHAR(60));");
+    database.execute("CREATE TABLE IF NOT EXISTS country (id INT, name  VARCHAR(60));");
+    database.execute("CREATE TABLE IF NOT EXISTS person_city_link (person_id INT, city_id INT, FOREIGN KEY(person_id) REFERENCES person(id), FOREIGN KEY(city_id) REFERENCES city(id));");
+    database.execute("CREATE TABLE IF NOT EXISTS person_person_link (person_id INT, contact_id INT, FOREIGN KEY(person_id) REFERENCES person(id), FOREIGN KEY(contact_id) REFERENCES person(id));");
+    database.execute("CREATE TABLE IF NOT EXISTS city_country_link (city_id INT, country_id INT, FOREIGN KEY(city_id) REFERENCES city(id), FOREIGN KEY(country_id) REFERENCES country(id));");
   }
   
   // insertions
   
   void insertPerson(String name, int id) {
-    db.execute("INSERT INTO 'person' (id, name) values (" + id + ", \""  + name + "\");");
+    db.execute("INSERT INTO person (id, name) VALUES (" + id + ", \""  + name + "\");");
   }
   
   void insertCity(String name, int id) {
-    db.execute("INSERT INTO 'city' (id, name) values (" + id + ", \""  + name + "\");");
+    db.execute("INSERT INTO city (id, name) VALUES (" + id + ", \""  + name + "\");");
   }
   
   void insertCountry(String name, int id) {
-    db.execute("INSERT INTO 'country' (id, name) values (" + id + ", \""  + name + "\");");
+    db.execute("INSERT INTO country (id, name) VALUES (" + id + ", \""  + name + "\");");
   }
   
   void insertPersonPersonLnk(int origin_id, int target_id) {
     // connections are two-way so we need two insertions.
-    db.execute("INSERT INTO 'person_person_link' (person_id, contact_id) values (" + origin_id + ", "  + target_id + ");");
-    db.execute("INSERT INTO 'person_person_link' (person_id, contact_id) values (" + target_id + ", "  + origin_id + ");");
+    db.execute("INSERT INTO person_person_link (person_id, contact_id) VALUES (" + origin_id + ", "  + target_id + ");");
+    db.execute("INSERT INTO person_person_link (person_id, contact_id) VALUES (" + target_id + ", "  + origin_id + ");");
   }
   
   void insertPersonCityLink(int person_id, int city_id) {
-    db.execute("INSERT INTO 'person_city_link' (person_id, city_id) values (" + person_id + ", "  + city_id + ");");
+    db.execute("INSERT INTO person_city_link (person_id, city_id) VALUES (" + person_id + ", "  + city_id + ");");
   }
   
   void insertCityCountryLink(int city_id, int country_id) {
-    db.execute("INSERT INTO 'city_country_link' (city_id, country_id) values (" + city_id + ", "  + country_id + ");");
+    db.execute("INSERT INTO city_country_link (city_id, country_id) VALUES (" + city_id + ", "  + country_id + ");");
   }
   
   // queries
@@ -144,6 +150,7 @@ class DBManager {
   }
   
   // return a list of people that have at least total_degree connections.
+  // TODO: verify that these queries are accurate (there is a discrepancy between the fast and slow one, that causes me to question the validity of each.
   ArrayList<Person> peopleWithConnections(int min_degree, int max_degree, Boolean exhaustive) {
     ArrayList<Person> personList = new ArrayList<Person>();
     ArrayList<Integer> contactList = new ArrayList<Integer>();
@@ -153,34 +160,13 @@ class DBManager {
     if(exhaustive) {
       println("performing exhaustive query");
       // this takes a long time because we collect all of their connections
-      db.query("SELECT pcount.person_id, p.name, ppl.contact_id FROM ("
-              + "SELECT person_id, COUNT(contact_id) as 'count' FROM person_person_link "
-              + "GROUP BY person_id"
-              + ") AS pcount "
-              + "INNER JOIN person_person_link as ppl ON ppl.person_id = pcount.person_id "
-              + "INNER JOIN person as p ON p.id = pcount.person_id "
-              + "WHERE count >= " + min_degree + " AND count <= " + max_degree);
+      db.query("SELECT pcount.person_id, p.name, ppl.contact_id FROM (SELECT person_id, COUNT(contact_id) as 'count' FROM person_person_link GROUP BY person_id) AS pcount INNER JOIN person_person_link as ppl ON ppl.person_id = pcount.person_id INNER JOIN person as p ON p.id = pcount.person_id WHERE count >= "+min_degree+" AND count <= " + max_degree);
     } else {
       println("performing quick query");
       // this is faster because we only select the local connections   
-      db.query("SELECT person_id, person.name AS 'name', local_connections.contact_id FROM ("
-            + "SELECT pcount.person_id AS 'person_id', ppl.contact_id AS 'contact_id' FROM ("
-            + "SELECT person_id, COUNT(contact_id) as 'count' FROM person_person_link "
-            + "GROUP BY person_id"
-            + ") as pcount "
-            + "INNER JOIN person_person_link as ppl ON ppl.person_id = pcount.person_id "
-            + "WHERE pcount.count >= " + min_degree + " AND pcount.count <= " + max_degree + " "
-            + "INTERSECT "
-            + "SELECT pfilter.person_id, contact_filter.contact_id FROM ("
-            + "SELECT person_id as 'contact_id', COUNT(contact_id) as 'count' FROM person_person_link "
-            + "GROUP BY person_id"
-            + ") AS contact_filter "
-            + "INNER JOIN person_person_link as pfilter on pfilter.contact_id = contact_filter.contact_id "
-            + "WHERE contact_filter.count >= " + min_degree + " AND contact_filter.count <= " + max_degree
-            + ") AS local_connections "
-            + "INNER JOIN person ON person.id = local_connections.person_id ");
+      db.query("SELECT person_id, person.name AS 'name', b.contact_id FROM (SELECT pcount.person_id AS 'person_id', ppl.contact_id AS 'contact_id' FROM (SELECT person_id, COUNT(contact_id) as 'count' FROM person_person_link GROUP BY person_id) as pcount INNER JOIN person_person_link as ppl ON ppl.person_id = pcount.person_id WHERE pcount.count >= "+min_degree+" AND pcount.count <= "+max_degree+") AS a INNER JOIN (SELECT pfilter.person_id, contact_filter.contact_id FROM (SELECT person_id as 'contact_id', COUNT(contact_id) as 'count' FROM person_person_link GROUP BY person_id) AS contact_filter INNER JOIN person_person_link as pfilter on pfilter.contact_id = contact_filter.contact_id WHERE contact_filter.count >= "+min_degree+" AND contact_filter.count <= "+max_degree+") AS b USING (person_id, contact_id) INNER JOIN person ON person.id = b.person_id");
     }
-    
+    int count = 0;
     while(db.next()) {
       // init and new person
       if(currPerson == -1 || currPerson != db.getInt("person_id")) {
@@ -188,12 +174,13 @@ class DBManager {
         if(currPerson != -1 && currPerson != db.getInt("person_id")) {
           personList.add(new Person(currPerson, currName, contactList));
         }
+        count = 0;
         currPerson = db.getInt("person_id");
         currName = db.getString("name");
         contactList = new ArrayList<Integer>();
-        println("loading " + currName);
       }
       // build the contact list
+      count ++;
       contactList.add(db.getInt("contact_id"));
     }  
     return personList;
