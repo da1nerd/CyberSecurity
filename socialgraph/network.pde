@@ -39,12 +39,14 @@ class Bubble {
     
     _p = p;
     
-    int xpos = 0;
-    int ypos = 0;   
+    float xpos = random(-200, 200);
+    float ypos = random(-200, 200);   
     
     _p.makeFixed();
     _p.position().set(xpos, ypos, 0);
   }
+  
+  
   
   public int getID() {
     return _id;
@@ -132,13 +134,15 @@ class Network {
   Network() {
     println("instantiate network");
     clearNetwork();
-    createBubble();
+    
+    physics.setIntegrator( ParticleSystem.RUNGE_KUTTA );
+    //physics.setIntegrator( ParticleSystem.MODIFIED_EULER );
   }
   
  /* Add a person to the network
   * 
   */
-  void addPerson(Person pers, int bubble) {
+  void addPerson(Person pers, int bubble_id) {
   
     persons.add( pers );
     
@@ -162,7 +166,7 @@ class Network {
     pers._p.position().set( random( -1, 1 ), random( -1, 1 ), 0 );
     
     // add the person to a bubble
-    addPerson2Bubble(pers, bubble);
+    addPerson2Bubble(pers, bubble_id);
   }
   
  /* Delete a person from the network by its ID
@@ -228,15 +232,31 @@ class Network {
   * 
   */
   void clearNetwork() {
+    println("clear the whole network");
     persons.clear();
+    bubbles.clear();
     physics.clear();
+    System.gc();
   }
   
- /* 
+ /* Update changes from the filter
   * 
   */
-  updateFilters() {
+  public void updateFilters(FilterManager fm) {
     
+    clearNetwork();
+    println("update filter");
+    for(int i = 0; i < fm._filters.size(); ++i)
+    {
+      int id = createBubble();
+      GraphFilter gf = (GraphFilter)fm._filters.get(i);
+      for(int j = 0; j < gf._people.size(); ++j)
+      {
+        Person p = (Person)gf._people.get(j);
+        addPerson(p, id);
+      }
+    }
+    fm._updated = false;
   }
   
  /* Draw the network
@@ -244,16 +264,12 @@ class Network {
   */
   void drawNetwork(boolean click, float mx_raw, float my_raw) {
     
-    println("asd");
-    
     physics.tick(); 
     
     pushMatrix();
     translate( width/2 + panning.x , height/2 + panning.y );
     scale( scale );
-    
-    println("draw");
-    
+   
     drawParticles(click, mx_raw, my_raw);    
     popMatrix();
   }
@@ -546,9 +562,11 @@ class Network {
  /* Create a new bubble
   * 
   */
-  public void createBubble() {
+  public int createBubble() {
     Particle c = physics.makeParticle();
-    bubbles.add( new Bubble(c) );
+    Bubble b = new Bubble(c);
+    bubbles.add( b );
+    return b.getID();
   }
   
  /* Add a random node to the network
