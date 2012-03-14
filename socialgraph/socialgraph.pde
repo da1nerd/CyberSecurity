@@ -50,6 +50,9 @@ void setup()
 
 void draw()
 {
+  if(fm._updated == true) {
+    network.updateFilters(fm);
+  }
   background( 255 );
   fill( 0 );
   text( "" + network.physics.numberOfParticles() + " PARTICLES\n" + (int)frameRate + " FPS", 10, 20 );
