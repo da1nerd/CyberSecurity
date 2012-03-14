@@ -5,6 +5,9 @@ DBManager dbm = new DBManager(this);
 
 boolean ctrl_pressed = false;
 boolean drag = false;
+boolean pan_scene = false;
+
+PVector last_mouse_pos = new PVector(0,0);
 
 Network network;
 
@@ -31,6 +34,12 @@ void setup()
   //controlP5.addSlider("Min_Connections",100,200,128,10,60,100,10);
   controlP5.end();
   
+  
+  addMouseWheelListener(new java.awt.event.MouseWheelListener() { 
+    public void mouseWheelMoved(java.awt.event.MouseWheelEvent evt) { 
+      mouseWheel(evt.getWheelRotation());
+  }}); 
+  
   network = new Network();
   createDummyNetwork();
   
@@ -49,24 +58,40 @@ void draw()
 
 void mousePressed()
 {
-  if (mouseEvent.getClickCount() == 2) {
-    network.selectNode(ctrl_pressed, mouseX, mouseY);
-  } else {
-    network.selectDragNode(mouseX, mouseY);
+  if( mouseButton == LEFT )
+  {
+    if (mouseEvent.getClickCount() == 2) {
+      network.selectNode(ctrl_pressed, mouseX, mouseY);
+    } else {
+      network.selectDragNode(mouseX, mouseY);
+    }
+    drag = true;
   }
   
-  drag = true;
+  if( mouseButton == RIGHT )
+  {
+    last_mouse_pos = new PVector(mouseX, mouseY);
+    pan_scene = true;
+  }
 }
 
 void mouseDragged()
 {
   if(drag)
     network.dragNode(mouseX, mouseY);
+    
+  if(pan_scene)
+    network.updatePanning(new PVector(mouseX-last_mouse_pos.x, mouseY-last_mouse_pos.y));
 }
 
 void mouseReleased() {
   network.releaseDragNode();
   drag = false;
+  
+  if(pan_scene) {
+    pan_scene = false;
+    network.savePanning();
+  }
 }
 
 void keyPressed()
@@ -82,6 +107,11 @@ void keyPressed()
     addRandomNode();
     return;
   }
+  
+  if( key == DELETE)
+  {
+    network.deleteSelectedNodes(); 
+  }
 
   if ( key == CODED ) {
     if ( keyCode == CONTROL ) {
@@ -95,6 +125,13 @@ void keyPressed()
 void keyReleased()
 {
   ctrl_pressed = false;
+}
+
+void mouseWheel(int delta) {  
+  if(delta > 0)
+    network.zoomOut();
+  else
+    network.zoomIn();
 }
 
 public void Button1(int v) {

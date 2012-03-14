@@ -90,9 +90,9 @@ class DBManager {
     database.execute("CREATE TABLE IF NOT EXISTS person (id INT, name VARCHAR(60));");
     database.execute("CREATE TABLE IF NOT EXISTS city (id INT, name  VARCHAR(60));");
     database.execute("CREATE TABLE IF NOT EXISTS country (id INT, name  VARCHAR(60));");
-    database.execute("CREATE TABLE IF NOT EXISTS person_city_link (person_id INT, city_id INT, FOREIGN KEY(person_id) REFERENCES person(id), FOREIGN KEY(city_id) REFERENCES city(id));");
-    database.execute("CREATE TABLE IF NOT EXISTS person_person_link (person_id INT, contact_id INT, FOREIGN KEY(person_id) REFERENCES person(id), FOREIGN KEY(contact_id) REFERENCES person(id));");
-    database.execute("CREATE TABLE IF NOT EXISTS city_country_link (city_id INT, country_id INT, FOREIGN KEY(city_id) REFERENCES city(id), FOREIGN KEY(country_id) REFERENCES country(id));");
+    database.execute("CREATE TABLE IF NOT EXISTS person_city_link (person_id INT, city_id INT);");
+    database.execute("CREATE TABLE IF NOT EXISTS person_person_link (person_id INT, contact_id INT);");
+    database.execute("CREATE TABLE IF NOT EXISTS city_country_link (city_id INT, country_id INT);");
   }
   
   // insertions
@@ -186,3 +186,4 @@ class DBManager {
     return personList;
   }
 }
+
