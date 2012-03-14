@@ -232,6 +232,13 @@ class Network {
     physics.clear();
   }
   
+ /* 
+  * 
+  */
+  updateFilters() {
+    
+  }
+  
  /* Draw the network
   * 
   */
