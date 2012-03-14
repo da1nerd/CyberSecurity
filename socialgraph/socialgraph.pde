@@ -2,6 +2,7 @@ import controlP5.*;
 
 ControlP5 controlP5;
 DBManager dbm = new DBManager(this);
+FilterManager fm = new FilterManager();
 
 boolean ctrl_pressed = false;
 boolean drag = false;
@@ -29,8 +30,8 @@ void setup()
   ControlGroup cg = controlP5.addGroup("controls",30,30);
   cg.moveTo(cw);
   controlP5.begin(cg,0,10);
-  controlP5.addButton("Button1").linebreak();
-  controlP5.addButton("Load_Data").linebreak();
+  controlP5.addButton("Add_Filter").linebreak();
+  //controlP5.addButton("Load_Data").linebreak();
   //controlP5.addSlider("Min_Connections",100,200,128,10,60,100,10);
   controlP5.end();
   
@@ -52,9 +53,10 @@ void draw()
   background( 255 );
   fill( 0 );
   text( "" + network.physics.numberOfParticles() + " PARTICLES\n" + (int)frameRate + " FPS", 10, 20 );
-
   network.drawNetwork(drag, mouseX, mouseY);  
 }
+
+/* USER INTERACTION */
 
 void mousePressed()
 {
@@ -134,10 +136,15 @@ void mouseWheel(int delta) {
     network.zoomIn();
 }
 
-public void Button1(int v) {
-  addRandomNode();
+public void Add_Filter(int v) {
+  //addRandomNode();
+  GraphFilter f1 = fm.addFilter();
+  f1.load(25,35); 
+  GraphFilter f2 = fm.addFilter();
+  f2.load(25,35); 
+  fm._updated = true;
 }
 
-public void Load_Data(int v) {
-  load_data();
-}
+//public void Load_Data(int v) {
+//  load_data();
+//}

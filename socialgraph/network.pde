@@ -56,15 +56,17 @@ class Bubble {
 }
 
 //
-// dummy network
-//
+// dummy network: DEPRECIATED
+// 
 void createDummyNetwork() {
   network.clearNetwork();
-  Iterator itr = dbm.peopleWithConnections(25,35, false).iterator();
+  
+  /*Iterator itr = dbm.peopleWithConnections(25,35, false).iterator();
   
   while(itr.hasNext()) {
     network.addPerson((Person)itr.next(), 0);
   }
+  */
   
   
  /*   
@@ -78,6 +80,7 @@ void createDummyNetwork() {
   */
 }
 
+// DEPRECIATED
 void addRandomNode() {
   ArrayList links = new ArrayList<Integer>();
   int num_links = (int)random( 1, network.persons.size() );
