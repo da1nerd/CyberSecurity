@@ -1,5 +1,31 @@
 import traer.physics.*;
 
+static int bubble_id_counter = 0;
+class Bubble {
+  private int _id;
+  private Particle _p;
+  
+  public Bubble(Particle p) {
+    _id = bubble_id_counter++;
+    
+    _p = p;
+    
+    float xpos = random(-200, 200);
+    float ypos = random(-200, 200);   
+    
+    _p.makeFixed();
+    _p.position().set(xpos, ypos, 0);
+  }
+  
+  public int getID() {
+    return _id;
+  }
+  
+  public Particle getParticle() {
+    return _p; 
+  }
+}
+
 //
 // Class holding the whole network
 //
@@ -17,20 +43,24 @@ class Network {
   ParticleSystem physics = new ParticleSystem( 0, 0.1 );
   
   ArrayList persons = new ArrayList<Person>();
-  ArrayList bubbles = new ArrayList<Particle>();
+  ArrayList bubbles = new ArrayList<Bubble>();
     
  /* Constructor
   * 
   */
   Network() {
+    println("instantiate network");
     clearNetwork();
-    createBubble(0, 0);
+    
+    physics.setIntegrator( ParticleSystem.RUNGE_KUTTA );
+    //physics.setIntegrator( ParticleSystem.MODIFIED_EULER );
   }
   
  /* Add a person to the network
   * 
   */
-  void addPerson(Person pers, int bubble) {
+  void addPerson(Person pers, int bubble_id) {
+  
     persons.add( pers );
     
     // add particle
@@ -53,7 +83,7 @@ class Network {
     pers._p.position().set( random( -1, 1 ), random( -1, 1 ), 0 );
     
     // add the person to a bubble
-    addPerson2Bubble(pers, bubble);
+    addPerson2Bubble(pers, bubble_id);
   }
   
  /* Delete a person from the network by its ID
@@ -119,8 +149,31 @@ class Network {
   * 
   */
   void clearNetwork() {
+    println("clear the whole network");
     persons.clear();
+    bubbles.clear();
     physics.clear();
+    System.gc();
+  }
+  
+ /* Update changes from the filter
+  * 
+  */
+  public void updateFilters(FilterManager fm) {
+    
+    clearNetwork();
+    println("update filter");
+    for(int i = 0; i < fm._filters.size(); ++i)
+    {
+      int id = createBubble();
+      GraphFilter gf = (GraphFilter)fm._filters.get(i);
+      for(int j = 0; j < gf._people.size(); ++j)
+      {
+        Person p = (Person)gf._people.get(j);
+        addPerson(p, id);
+      }
+    }
+    fm._updated = false;
   }
   
  /* Draw the network
@@ -129,13 +182,11 @@ class Network {
   void drawNetwork(boolean click, float mx_raw, float my_raw) {
     
     physics.tick(); 
-    //if ( physics.numberOfParticles() > 1 )
-      //updateCentroid();
     
     pushMatrix();
     translate( width/2 + panning.x , height/2 + panning.y );
     scale( scale );
-    
+   
     drawParticles(click, mx_raw, my_raw);    
     popMatrix();
   }
@@ -266,6 +317,17 @@ class Network {
   { 
     
     //
+    // draw bubbles centers
+    //
+    for ( int i = 0; i < bubbles.size(); ++i )
+    {
+      Particle p = ((Bubble)bubbles.get(i)).getParticle();
+      fill( color(0, 255, 0, 80) );
+      noStroke();
+      ellipse( p.position().x(), p.position().y(), 50, 50 );
+    }
+    
+    //
     // draw edges
     //
     strokeWeight( 2 );
@@ -280,7 +342,7 @@ class Network {
       // if yes then don't draw the line
       boolean draw_line = true;
       for(int j = 0; j < bubbles.size(); ++j) {
-        Particle c = (Particle)bubbles.get(j);
+        Particle c = ((Bubble)bubbles.get(j)).getParticle();
         if(a == c || b == c )
           draw_line = false;
       }
@@ -340,41 +402,44 @@ class Network {
       
       ellipse( v.position().x(), v.position().y(), NODE_SIZE, NODE_SIZE );
     }
+
+    
+    
   }
   
   
- /* Update the centroid of the network
-  * 
-  */
-  void updateCentroid()
-  {
-    float 
-      xMax = Float.NEGATIVE_INFINITY, 
-      xMin = Float.POSITIVE_INFINITY, 
-      yMin = Float.POSITIVE_INFINITY, 
-      yMax = Float.NEGATIVE_INFINITY;
-  
-    for ( int i = 0; i < physics.numberOfParticles(); ++i )
-    {
-      Particle p = physics.getParticle( i );
-      xMax = max( xMax, p.position().x() );
-      xMin = min( xMin, p.position().x() );
-      yMin = min( yMin, p.position().y() );
-      yMax = max( yMax, p.position().y() );
-    }
-    float deltaX = xMax-xMin;
-    float deltaY = yMax-yMin;
-    
-    centroidX = xMin + 0.5*deltaX;
-    centroidY = yMin +0.5*deltaY;
-    
+// /* Update the centroid of the network
+//  * 
+//  */
+//  void updateCentroid()
+//  {
+//    float 
+//      xMax = Float.NEGATIVE_INFINITY, 
+//      xMin = Float.POSITIVE_INFINITY, 
+//      yMin = Float.POSITIVE_INFINITY, 
+//      yMax = Float.NEGATIVE_INFINITY;
+//  
+//    for ( int i = 0; i < physics.numberOfParticles(); ++i )
+//    {
+//      Particle p = physics.getParticle( i );
+//      xMax = max( xMax, p.position().x() );
+//      xMin = min( xMin, p.position().x() );
+//      yMin = min( yMin, p.position().y() );
+//      yMax = max( yMax, p.position().y() );
+//    }
+//    float deltaX = xMax-xMin;
+//    float deltaY = yMax-yMin;
+//    
+//    centroidX = xMin + 0.5*deltaX;
+//    centroidY = yMin +0.5*deltaY;
+//    
 //    if ( deltaY > deltaX )
 //      scale = height/(deltaY+50);
 //    else
 //      scale = width/(deltaX+50);
 //      
 //    scale = scale > 4 ? 4 : scale;
-  }
+//  }
   
  /* Add a spacer between nodes
   * 
@@ -414,22 +479,26 @@ class Network {
  /* Create a new bubble
   * 
   */
-  public void createBubble(int xpos, int ypos) {
+  public int createBubble() {
     Particle c = physics.makeParticle();
-    c.makeFixed();
-    c.position().set(xpos, ypos, 0);
-    
-    bubbles.add(c);
+    Bubble b = new Bubble(c);
+    bubbles.add( b );
+    return b.getID();
   }
   
  /* Add a random node to the network
   * 
   */
-  public void addPerson2Bubble(Person p, int bubble) {
-    //println("adding attraction to bubble center");
-    //physics.makeAttraction( p.getParticle(), b.c, 100, 1 );
+  public void addPerson2Bubble(Person p, int bubble_id) {
     
-    Particle c = (Particle)bubbles.get(bubble);
+    int i = 0;
+    for(; i < bubbles.size(); ++i)
+    {
+      if( ((Bubble)bubbles.get(i)).getID() == bubble_id )
+        break;
+    }
+    
+    Particle c = ((Bubble)bubbles.get(i)).getParticle();
     physics.makeSpring( p.getParticle(), c, 0.001, 0.001, 50);
   }
 
