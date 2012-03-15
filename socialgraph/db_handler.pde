@@ -36,21 +36,21 @@ class DBManager {
     if(!f.exists()) {
       // new database
       newdb=true;
-      println("Creating new database: " + f.getPath());
+      println("DBManager:connect Creating new database: " + f.getPath());
       try {
         f.createNewFile();
       } catch(IOException ex) {
-        println("ERROR CREATING DATABASE: " + db_path);
+        println("DBManager:connect ERROR CREATING DATABASE: " + db_path);
         return false;
       }
     } else if(rebuild) {
       // rebuild existing database
-      println("Rebulding database: " + f.getPath());
+      println("DBManager:connect Rebulding database: " + f.getPath());
       try {
         f.delete();
         f.createNewFile();
       } catch(IOException ex) {
-        println("ERROR REBUILDING DATABASE: " + db_path);
+        println("DBManager:connect ERROR REBUILDING DATABASE: " + db_path);
         return false;
       }
     }
@@ -62,7 +62,7 @@ class DBManager {
         // reload the database if nessesary
         if(rebuild || newdb) { initDB(db); }
     } else {
-      println("FAILED CONNECTING TO DATABASE " + db_path);
+      println("DBManager:connect FAILED CONNECTING TO DATABASE " + db_path);
       // DIE!
       return false;
     }
@@ -80,7 +80,7 @@ class DBManager {
    *
    */
   private void initDB(MySQL database) { //SQLite database) {
-    println("Initializing database: " + database.database);
+    println("DBManager:initDB Initializing database: " + database.database);
     database.execute("DROP TABLE IF EXISTS person");
     database.execute("DROP TABLE IF EXISTS city");
     database.execute("DROP TABLE IF EXISTS country");
@@ -158,11 +158,11 @@ class DBManager {
     String currName = "";
     
     if(exhaustive) {
-      println("performing exhaustive query");
+      println("DBManager:peopleWithConnections performing exhaustive query");
       // this takes a long time because we collect all of their connections
       db.query("SELECT pcount.person_id, p.name, ppl.contact_id FROM (SELECT person_id, COUNT(contact_id) as 'count' FROM person_person_link GROUP BY person_id) AS pcount INNER JOIN person_person_link as ppl ON ppl.person_id = pcount.person_id INNER JOIN person as p ON p.id = pcount.person_id WHERE count >= "+min_degree+" AND count <= " + max_degree);
     } else {
-      println("performing quick query");
+      println("DBManager:peopleWithConnections performing quick query");
       // this is faster because we only select the local connections   
       db.query("SELECT person_id, person.name AS 'name', b.contact_id FROM (SELECT pcount.person_id AS 'person_id', ppl.contact_id AS 'contact_id' FROM (SELECT person_id, COUNT(contact_id) as 'count' FROM person_person_link GROUP BY person_id) as pcount INNER JOIN person_person_link as ppl ON ppl.person_id = pcount.person_id WHERE pcount.count >= "+min_degree+" AND pcount.count <= "+max_degree+") AS a INNER JOIN (SELECT pfilter.person_id, contact_filter.contact_id FROM (SELECT person_id as 'contact_id', COUNT(contact_id) as 'count' FROM person_person_link GROUP BY person_id) AS contact_filter INNER JOIN person_person_link as pfilter on pfilter.contact_id = contact_filter.contact_id WHERE contact_filter.count >= "+min_degree+" AND contact_filter.count <= "+max_degree+") AS b USING (person_id, contact_id) INNER JOIN person ON person.id = b.person_id");
     }

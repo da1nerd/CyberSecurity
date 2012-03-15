@@ -2,19 +2,34 @@ import traer.physics.*;
 
 static int bubble_id_counter = 0;
 class Bubble {
+  final int BELOW_Z_PLANE = 0;
+  final int ABOVE_Z_PLANE = 1000;
+	
   private int _id;
   private Particle _p;
+  private float _xpos;
+  private float _ypos;
   
   public Bubble(Particle p) {
     _id = bubble_id_counter++;
     
     _p = p;
     
-    float xpos = random(-200, 200);
-    float ypos = random(-200, 200);   
+    _xpos = random(-200, 200);
+    _ypos = random(-200, 200);
     
     _p.makeFixed();
-    _p.position().set(xpos, ypos, 0);
+    _p.position().set(_xpos, _ypos, BELOW_Z_PLANE);
+  }
+  
+  // raise the bubble above everything else so we can select it
+  public void raise() {
+	_p.position().set(_xpos, _ypos, ABOVE_Z_PLANE);
+  }
+  
+  // lower the bubble so that it lies beneath everything else
+  public void lower() {
+	_p.position().set(_xpos, _ypos, BELOW_Z_PLANE);
   }
   
   public int getID() {
@@ -42,8 +57,8 @@ class Network {
   
   ParticleSystem physics = new ParticleSystem( 0, 0.1 );
   
-  ArrayList persons = new ArrayList<Person>();
-  ArrayList bubbles = new ArrayList<Bubble>();
+  ArrayList<Person> persons = new ArrayList<Person>();
+  ArrayList<Bubble> bubbles = new ArrayList<Bubble>();
     
  /* Constructor
   * 
@@ -53,7 +68,7 @@ class Network {
     clearNetwork();
     
     physics.setIntegrator( ParticleSystem.RUNGE_KUTTA );
-    //physics.setIntegrator( ParticleSystem.MODIFIED_EULER );
+   // physics.setIntegrator( ParticleSystem.MODIFIED_EULER );
   }
   
  /* Add a person to the network
@@ -315,21 +330,38 @@ class Network {
   */
   void drawParticles(boolean click, float mx_raw, float my_raw)
   { 
-    
-    //
-    // draw bubbles centers
-    //
+      if(shft_pressed) {
+        drawEdges();
+        drawNodes(mx_raw, my_raw);
+        drawBubbles();
+        // TODO: allow bubble selection 
+        // TODO: display new dialog with filter controls.
+        // display dialog with ff.show(filterObject);
+      } else {
+        drawBubbles();
+        drawEdges();
+        drawNodes(mx_raw, my_raw);
+      }
+  }
+  
+  //
+  // draw bubbles centers
+  //
+  private void drawBubbles() {
     for ( int i = 0; i < bubbles.size(); ++i )
     {
-      Particle p = ((Bubble)bubbles.get(i)).getParticle();
+      Particle p = bubbles.get(i).getParticle();
       fill( color(0, 255, 0, 80) );
       noStroke();
-      ellipse( p.position().x(), p.position().y(), 50, 50 );
+      ellipse( p.position().x(), p.position().y(), 100, 100 );
     }
-    
-    //
-    // draw edges
-    //
+  }
+  
+  //
+  // draw edges
+  //
+  private void drawEdges() {
+
     strokeWeight( 2 );
     beginShape( LINES );
     for ( int i = 0; i < physics.numberOfSprings(); ++i )
@@ -366,10 +398,13 @@ class Network {
       }
     }
     endShape();
-   
-    //
-    // draw nodes
-    //
+  }
+
+  //
+  // draw nodes
+  //
+  private void drawNodes(float mx_raw, float my_raw) {
+
     ellipseMode( CENTER );
     
     // adjust mouse coordinates to match particle coordinates
@@ -402,9 +437,6 @@ class Network {
       
       ellipse( v.position().x(), v.position().y(), NODE_SIZE, NODE_SIZE );
     }
-
-    
-    
   }
   
   
@@ -480,7 +512,7 @@ class Network {
   * 
   */
   public int createBubble() {
-    Particle c = physics.makeParticle();
+    Particle c = physics.makeParticle(1, 1.0,1.0,10.0);
     Bubble b = new Bubble(c);
     bubbles.add( b );
     return b.getID();

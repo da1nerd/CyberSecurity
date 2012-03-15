@@ -38,6 +38,7 @@ class GraphFilter {
    
    // query the database
    _people = dbm.peopleWithConnections(_min_degree,_max_degree, false);
+   println("GraphFilter:load loaded " + _people.size() + " nodes into filter \"" + _name + "\"");
   }
   
   // get a person. return null if index is invalid

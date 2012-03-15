@@ -3,7 +3,10 @@ import controlP5.*;
 ControlP5 controlP5;
 DBManager dbm = new DBManager(this);
 FilterManager fm = new FilterManager();
+ControlWindow cw;
+FilterForm ff;
 
+boolean shft_pressed = false;
 boolean ctrl_pressed = false;
 boolean drag = false;
 boolean pan_scene = false;
@@ -23,18 +26,11 @@ void setup()
   // Controls
   //
   controlP5 = new ControlP5(this);
-  // add a new controller window
-  ControlWindow cw = controlP5.addControlWindow("win" ,250, 250);
-  cw.setLocation(100,100);
-  // begin a new group of auto-arranged controllers
-  ControlGroup cg = controlP5.addGroup("controls",30,30);
-  cg.moveTo(cw);
-  controlP5.begin(cg,0,10);
-  controlP5.addButton("Add_Filter").linebreak();
-  //controlP5.addButton("Load_Data").linebreak();
-  //controlP5.addSlider("Min_Connections",100,200,128,10,60,100,10);
-  controlP5.end();
-  
+ // controlP5.setControlFont(new ControlFont(createFont("Verdana",10), 10));
+  controlP5.Button b = controlP5.addButton("Add_Filter");
+  b.setSize(75, 20);
+  b.setLabel("Add new filter");
+  ff = new FilterForm();
   
   addMouseWheelListener(new java.awt.event.MouseWheelListener() { 
     public void mouseWheelMoved(java.awt.event.MouseWheelEvent evt) { 
@@ -53,6 +49,7 @@ void draw()
   if(fm._updated == true) {
     network.updateFilters(fm);
   }
+  
   background( 255 );
   fill( 0 );
   text( "" + network.physics.numberOfParticles() + " PARTICLES\n" + (int)frameRate + " FPS", 10, 20 );
@@ -114,6 +111,9 @@ void keyPressed()
     if ( keyCode == CONTROL ) {
       ctrl_pressed = true;
     } 
+    if (keyCode == SHIFT ) {
+      shft_pressed = true;
+    }
   }
   return;
 }
@@ -122,6 +122,7 @@ void keyPressed()
 void keyReleased()
 {
   ctrl_pressed = false;
+  shft_pressed = false;
 }
 
 void mouseWheel(int delta) {  
@@ -131,15 +132,12 @@ void mouseWheel(int delta) {
     network.zoomIn();
 }
 
+/* Displays a dialog for creating a new filter
+ *
+ */
 public void Add_Filter(int v) {
-  //addRandomNode();
-  fm.addFilter();
-  fm.get(0).load(25,35,-1,-1,-1,-1); 
-  fm.addFilter();
-  fm.get(1).load(36,40,-1,-1,-1,-1); 
-  fm._updated = true;
+  // create a new object to hold the filter form data.
+  ff.show();
 }
 
-//public void Load_Data(int v) {
-//  load_data();
-//}
+
