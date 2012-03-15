@@ -1,7 +1,7 @@
 class GraphFilter {
   String _name; // name of filter
   int _order; // order amongst other filters (0...n)
-  ArrayList<Person> _people; // people collected by this filter
+  private ArrayList<Person> _people; // people collected by this filter
   // range of total degree
   int _min_degree = -1; 
   int _max_degree = -1;
@@ -15,6 +15,7 @@ class GraphFilter {
   GraphFilter(String name, int order) {
     _name = name;
     _order = order;
+    _people = new ArrayList<Person>();
   }
   
   public void load(int min_degree, int max_degree, int min_degree_curr_to_prev, int max_degree_curr_to_prev, int min_degree_curr_from_prev, int max_degree_curr_from_prev) {
@@ -27,16 +28,30 @@ class GraphFilter {
    _max_degree_curr_from_prev = max_degree_curr_from_prev;
    
    // look up the previous filter
-   if((_min_degree_curr_to_prev != -1 && _max_degree_curr_to_prev != -1) || (_min_degree_curr_from_prev && _max_degree_curr_from_prev)) {
+   if((_min_degree_curr_to_prev != -1 && _max_degree_curr_to_prev != -1) || (_min_degree_curr_from_prev != -1 && _max_degree_curr_from_prev != -1)) {
      for(int i = 0; i < fm._filters.size(); i ++) {
-       if(fm.filters.get(i)._order == _order -1); {
-         prev_filter = fm.filters.get(i);
+       if(fm._filters.get(i)._order == _order -1); {
+         prev_filter = fm._filters.get(i);
        }
      }
    }
    
    // query the database
    _people = dbm.peopleWithConnections(_min_degree,_max_degree, false);
+  }
+  
+  // get a person. return null if index is invalid
+  public Person get(int index) {
+    if(index < _people.size() && index >= 0) {
+      return _people.get(index);
+    } else {
+      return null;
+    }
+  }
+  
+  // return how many people are in this filter
+  public int size() {
+    return _people.size();
   }
 }
 
@@ -45,7 +60,7 @@ class GraphFilter {
  *
  */
 class FilterManager {
-  ArrayList<GraphFilter> _filters;
+  private ArrayList<GraphFilter> _filters;
   Boolean _updated;
   
   FilterManager() {
@@ -54,10 +69,19 @@ class FilterManager {
   }
   
   // create a new empty filter
-  public GraphFilter addFilter() {
+  public void addFilter() {
     // initialize new filter with default name and order
-    GraphFilter f1 = new GraphFilter("filter " + _filters.size(), _filters.size());
-    _filters.add(f1);
-    return f1;
+    _filters.add(new GraphFilter("filter " + _filters.size(), _filters.size()));
+  }
+  
+  // return number of filters
+  public int size() {
+    
+    return _filters.size();
+  }
+  
+  // get a filter
+  public GraphFilter get(int index) {
+    return _filters.get(index);
   }
 }

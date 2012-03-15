@@ -103,21 +103,13 @@ void keyPressed()
 {
   if ( key == 'c' )
   {
-    createDummyNetwork();
+    network.clearNetwork();
     return;
   }
-  
-  if ( key == ' ' )
-  {
-    addRandomNode();
-    return;
-  }
-  
   if( key == DELETE)
   {
     network.deleteSelectedNodes(); 
   }
-
   if ( key == CODED ) {
     if ( keyCode == CONTROL ) {
       ctrl_pressed = true;
@@ -141,8 +133,10 @@ void mouseWheel(int delta) {
 
 public void Add_Filter(int v) {
   //addRandomNode();
-  GraphFilter f1 = fm.addFilter();
-  f1.load(25,35,-1,-1,-1,-1); 
+  fm.addFilter();
+  fm.get(0).load(25,35,-1,-1,-1,-1); 
+  fm.addFilter();
+  fm.get(1).load(36,40,-1,-1,-1,-1); 
   fm._updated = true;
 }
 

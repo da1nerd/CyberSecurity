@@ -163,13 +163,13 @@ class Network {
     
     clearNetwork();
     println("update filter");
-    for(int i = 0; i < fm._filters.size(); ++i)
+    for(int i = 0; i < fm.size(); ++i)
     {
       int id = createBubble();
-      GraphFilter gf = (GraphFilter)fm._filters.get(i);
-      for(int j = 0; j < gf._people.size(); ++j)
+      GraphFilter gf = (GraphFilter)fm.get(i);
+      for(int j = 0; j < gf.size(); ++j)
       {
-        Person p = (Person)gf._people.get(j);
+        Person p = (Person)gf.get(j);
         addPerson(p, id);
       }
     }
