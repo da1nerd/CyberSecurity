@@ -6,8 +6,11 @@ class FilterForm implements ControlListener {
   private boolean updateExisting;
   private GraphFilter existingFilter;
   
-  FilterForm() {
-    ctrlwindow = controlP5.addControlWindow("newFilterWindow",100,100,300,300);
+  
+  FilterForm(int p1, int p2, int p3, int p4, int p5, int p6) {  
+	int h = 300;
+	int w = 300;
+    ctrlwindow = controlP5.addControlWindow("newFilterWindow",screen.width/2-w/2,screen.height/2-h/2,w,h);
     ctrlwindow.hideCoordinates();
     ctrlwindow.hide();
     
@@ -18,12 +21,12 @@ class FilterForm implements ControlListener {
     
     fieldMinDeg = controlP5.addTextfield("minDegree",10,25,30,20);
     fieldMinDeg.setLabel("min");
-    fieldMinDeg.setText("-1");
+    fieldMinDeg.setText("" + p1);
     fieldMinDeg.setWindow(ctrlwindow);
     
     fieldMaxDeg = controlP5.addTextfield("maxDegree",100,25,30,20);
     fieldMaxDeg.setLabel("max");
-    fieldMaxDeg.setText("-1");
+    fieldMaxDeg.setText("" + p2);
     fieldMaxDeg.setWindow(ctrlwindow);
     
     // degree to previous
@@ -33,12 +36,12 @@ class FilterForm implements ControlListener {
     
     fieldMinDegToPrev = controlP5.addTextfield("minDegreeToPrev",10,90,30,20);
     fieldMinDegToPrev.setLabel("min");
-    fieldMinDegToPrev.setText("-1");
+    fieldMinDegToPrev.setText("" + p3);
     fieldMinDegToPrev.setWindow(ctrlwindow);
     
     fieldMaxDegToPrev = controlP5.addTextfield("maxDegreeToPrev",100,90,30,20);
     fieldMaxDegToPrev.setLabel("max");
-    fieldMaxDegToPrev.setText("-1");
+    fieldMaxDegToPrev.setText("" + p4);
     fieldMaxDegToPrev.setWindow(ctrlwindow);
     
     // degree from previous
@@ -48,12 +51,12 @@ class FilterForm implements ControlListener {
     
     fieldMinDegFromPrev = controlP5.addTextfield("minDegreeFromPrev",10,155,30,20);
     fieldMinDegFromPrev.setLabel("min");
-    fieldMinDegFromPrev.setText("-1");
+    fieldMinDegFromPrev.setText("" + p5);
     fieldMinDegFromPrev.setWindow(ctrlwindow);
     
     fieldMaxDegFromPrev = controlP5.addTextfield("maxDegreeFromPrev",100,155,30,20);
     fieldMaxDegFromPrev.setLabel("max");
-    fieldMaxDegFromPrev.setText("-1");
+    fieldMaxDegFromPrev.setText("" + p6);
     fieldMaxDegFromPrev.setWindow(ctrlwindow);
     
     // buttons
@@ -105,7 +108,6 @@ class FilterForm implements ControlListener {
   }
   
   public void controlEvent(ControlEvent theEvent) {
-    println("controlEvent: accessing a string from controller '"+theEvent.controller().name()+"': "+theEvent.controller().value());
     if(theEvent.controller().name() == "newFilterOKButton") {
       if(updateExisting) {
         // update existing filter
@@ -115,8 +117,6 @@ class FilterForm implements ControlListener {
         fm.addFilter();
         loadFilter(fm.get(fm.size()-1));
       }
-      fm._updated = true;
-      ctrlwindow.hide();
     } else if(theEvent.controller().name() == "newFilterCancelButton") {
       // hide the form,it gets trashed and remade when it is opened again.
       ctrlwindow.hide();
@@ -131,6 +131,9 @@ class FilterForm implements ControlListener {
   }
   
   private void loadFilter(GraphFilter gf) {
+    // TODO: error check
     gf.load(parseInt(fieldMinDeg.getText()),parseInt(fieldMaxDeg.getText()),parseInt(fieldMinDegToPrev.getText()),parseInt(fieldMaxDegToPrev.getText()),parseInt(fieldMinDegFromPrev.getText()),parseInt(fieldMaxDegFromPrev.getText()));
+    fm._updated = true;
+    ctrlwindow.hide();
   }
 }

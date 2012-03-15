@@ -1,5 +1,7 @@
 import controlP5.*;
+import java.awt.*;
 
+Dimension screen = Toolkit.getDefaultToolkit().getScreenSize();
 ControlP5 controlP5;
 DBManager dbm = new DBManager(this);
 FilterManager fm = new FilterManager();
@@ -17,20 +19,28 @@ Network network;
 
 void setup()
 {
-  size( 800, 600 );
-  
+  int w = 800;
+  int h = 600;
+  size( w, h );
+
   dbm.connect(dataPath("socialgraph.mysql"));
-  
-  
+
   //
   // Controls
   //
   controlP5 = new ControlP5(this);
  // controlP5.setControlFont(new ControlFont(createFont("Verdana",10), 10));
   controlP5.Button b = controlP5.addButton("Add_Filter");
-  b.setSize(75, 20);
-  b.setLabel("Add new filter");
-  ff = new FilterForm();
+  b.setPosition(65, 27);
+  b.setSize(95, 20);
+  b.setLabel("Add new filter (n)");
+  
+  controlP5.Button b2 = controlP5.addButton("Clear_Filters");
+  b2.setSize(85, 20);
+  b2.setPosition(165, 27);
+  b2.setLabel("Clear Filters (c)");
+  
+  ff = new FilterForm(25,35,-1,-1,-1,-1); // set some default form values
   
   addMouseWheelListener(new java.awt.event.MouseWheelListener() { 
     public void mouseWheelMoved(java.awt.event.MouseWheelEvent evt) { 
@@ -100,7 +110,12 @@ void keyPressed()
 {
   if ( key == 'c' )
   {
-    network.clearNetwork();
+    fm.clear();
+    return;
+  }
+  if ( key == 'n' )
+  {
+    ff.show();
     return;
   }
   if( key == DELETE)
@@ -140,4 +155,7 @@ public void Add_Filter(int v) {
   ff.show();
 }
 
+public void Clear_Filters(int v) {
+  fm.clear();
+}
 

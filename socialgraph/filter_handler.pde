@@ -62,7 +62,7 @@ class GraphFilter {
  */
 class FilterManager {
   private ArrayList<GraphFilter> _filters;
-  Boolean _updated;
+  private Boolean _updated;
   
   FilterManager() {
     _filters = new ArrayList<GraphFilter>();
@@ -84,5 +84,19 @@ class FilterManager {
   // get a filter
   public GraphFilter get(int index) {
     return _filters.get(index);
+  }
+  
+  // erase all of the filters
+  public void clear() {
+    _filters = new ArrayList<GraphFilter>();
+    _updated = true;
+  }
+  
+  public boolean updated() {
+    return _updated;
+  }
+  
+  public void ready() {
+    _updated = false;
   }
 }
