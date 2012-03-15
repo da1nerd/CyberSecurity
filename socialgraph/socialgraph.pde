@@ -42,7 +42,7 @@ void setup()
   }}); 
   
   network = new Network();
-  createDummyNetwork();
+  //createDummyNetwork();
   
   smooth();
   textFont( loadFont( "SansSerif-14.vlw" ) );
@@ -142,9 +142,7 @@ void mouseWheel(int delta) {
 public void Add_Filter(int v) {
   //addRandomNode();
   GraphFilter f1 = fm.addFilter();
-  f1.load(25,35); 
-  GraphFilter f2 = fm.addFilter();
-  f2.load(25,35); 
+  f1.load(25,35,-1,-1,-1,-1); 
   fm._updated = true;
 }
 
