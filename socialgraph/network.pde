@@ -184,7 +184,7 @@ class Network {
         addPerson(p, id);
       }
     }
-    fm.ready();
+    fm.makeClean();
   }
   
  /* Check if the given coordinates match a node
