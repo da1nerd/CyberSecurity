@@ -7,6 +7,8 @@ public class Person {
   private String _name;
   private ArrayList _connections = new ArrayList<Integer>();
   private Particle _p;
+  private int degree;
+  
   public boolean selected;
 
   public Person(int id, String name, ArrayList<Integer> con) {
@@ -22,6 +24,17 @@ public class Person {
   
   public Particle getParticle() {
     return _p;
+  }
+  
+  public ArrayList<Integer> getConnections() {
+    return _connections;
+  }
+  
+  
+  // TODO: Query the actual degree of the node from the database
+  public int getDegree() {
+    
+    return -1;
   }
   
 }
