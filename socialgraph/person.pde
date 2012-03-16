@@ -7,12 +7,13 @@ public class Person {
   private String _name;
   private ArrayList _connections = new ArrayList<Integer>();
   private Particle _p;
-  private int degree;
+  private int _degree;
   
   public boolean selected;
 
-  public Person(int id, String name, ArrayList<Integer> con) {
+  public Person(int id, int degree, String name, ArrayList<Integer> con) {
     _id = id;
+    _degree = degree;
     _name = name;
     _connections = con;
     selected = false;
@@ -31,7 +32,7 @@ public class Person {
   }
   
   public int getDegree() {
-    return degree;
+    return _degree;
   }
   
 }
