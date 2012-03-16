@@ -526,6 +526,13 @@ class Network {
     Particle c = ((Bubble)bubbles.get(i)).getParticle();
     physics.makeSpring( p.getParticle(), c, 0.001, 0.001, 50);
   }
+  
+  int last_bubble_selection = -1;
+  void selectDragBubble(float mx_raw, float my_raw) {
+//    int i = checkNodeHit(mx_raw, my_raw);
+//    if( i >= 0) ((Person)persons.get(i)).getParticle().makeFixed();
+//    last_selection = i;
+  }
 
 }
 

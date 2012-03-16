@@ -86,7 +86,11 @@ void mousePressed()
     }
     else
     {
-      network.selectDragNode(mouseX, mouseY);
+      if( shft_pressed ) {
+        network.selectDragBubble(mouseX, mouseY);
+      } else {
+        network.selectDragNode(mouseX, mouseY);
+      }
     }
     drag = true;
   }
