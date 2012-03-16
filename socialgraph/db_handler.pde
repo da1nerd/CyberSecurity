@@ -155,6 +155,7 @@ class DBManager {
     ArrayList<Person> personList = new ArrayList<Person>();
     ArrayList<Integer> contactList = new ArrayList<Integer>();
     int currPerson = -1;
+		int currDegree = -1;
     String currName = "";
     
     if(exhaustive) {
@@ -164,7 +165,7 @@ class DBManager {
     } else {
       println("DBManager:peopleWithConnections performing quick query");
       // this is faster because we only select the local connections   
-      db.query("SELECT person_id, person.name AS 'name', b.contact_id FROM (SELECT pcount.person_id AS 'person_id', ppl.contact_id AS 'contact_id' FROM (SELECT person_id, COUNT(contact_id) as 'count' FROM person_person_link GROUP BY person_id) as pcount INNER JOIN person_person_link as ppl ON ppl.person_id = pcount.person_id WHERE pcount.count >= "+min_degree+" AND pcount.count <= "+max_degree+") AS a INNER JOIN (SELECT pfilter.person_id, contact_filter.contact_id FROM (SELECT person_id as 'contact_id', COUNT(contact_id) as 'count' FROM person_person_link GROUP BY person_id) AS contact_filter INNER JOIN person_person_link as pfilter on pfilter.contact_id = contact_filter.contact_id WHERE contact_filter.count >= "+min_degree+" AND contact_filter.count <= "+max_degree+") AS b USING (person_id, contact_id) INNER JOIN person ON person.id = b.person_id");
+      db.query("SELECT person_id, degree, person.name AS 'name', b.contact_id FROM (SELECT pcount.person_id AS 'person_id', pcount.count AS 'degree', ppl.contact_id AS 'contact_id' FROM (SELECT person_id, COUNT(contact_id) as 'count' FROM person_person_link GROUP BY person_id) as pcount INNER JOIN person_person_link as ppl ON ppl.person_id = pcount.person_id WHERE pcount.count >= "+min_degree+" AND pcount.count <= "+max_degree+") AS a INNER JOIN (SELECT pfilter.person_id, contact_filter.contact_id FROM (SELECT person_id as 'contact_id', COUNT(contact_id) as 'count' FROM person_person_link GROUP BY person_id) AS contact_filter INNER JOIN person_person_link as pfilter on pfilter.contact_id = contact_filter.contact_id WHERE contact_filter.count >= "+min_degree+" AND contact_filter.count <= "+max_degree+") AS b USING (person_id, contact_id) INNER JOIN person ON person.id = b.person_id");
     }
     int count = 0;
     while(db.next()) {
@@ -176,6 +177,7 @@ class DBManager {
         }
         count = 0;
         currPerson = db.getInt("person_id");
+				currDegree = db.getInt("degree");
         currName = db.getString("name");
         contactList = new ArrayList<Integer>();
       }

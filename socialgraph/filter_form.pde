@@ -133,7 +133,7 @@ class FilterForm implements ControlListener {
   private void loadFilter(GraphFilter gf) {
     // TODO: error check
     gf.load(parseInt(fieldMinDeg.getText()),parseInt(fieldMaxDeg.getText()),parseInt(fieldMinDegToPrev.getText()),parseInt(fieldMaxDegToPrev.getText()),parseInt(fieldMinDegFromPrev.getText()),parseInt(fieldMaxDegFromPrev.getText()));
-    fm._updated = true;
+    fm.makeDirty();
     ctrlwindow.hide();
   }
 }

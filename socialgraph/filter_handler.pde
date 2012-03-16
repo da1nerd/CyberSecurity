@@ -18,6 +18,9 @@ class GraphFilter {
     _people = new ArrayList<Person>();
   }
   
+	/* load 
+	 *
+	 */
   public void load(int min_degree, int max_degree, int min_degree_curr_to_prev, int max_degree_curr_to_prev, int min_degree_curr_from_prev, int max_degree_curr_from_prev) {
    GraphFilter prev_filter = null;;
    _min_degree = min_degree;
@@ -41,7 +44,9 @@ class GraphFilter {
    println("GraphFilter:load loaded " + _people.size() + " nodes into filter \"" + _name + "\"");
   }
   
-  // get a person. return null if index is invalid
+  /* get a person. return null if index is invalid
+   *
+   */
   public Person get(int index) {
     if(index < _people.size() && index >= 0) {
       return _people.get(index);
@@ -50,7 +55,9 @@ class GraphFilter {
     }
   }
   
-  // return how many people are in this filter
+  /* return how many people are in this filter
+   *
+   */
   public int size() {
     return _people.size();
   }
@@ -69,34 +76,55 @@ class FilterManager {
     _updated = false;
   }
   
-  // create a new empty filter
+  /* create a new empty filter
+   *
+   */
   public void addFilter() {
     // initialize new filter with default name and order
     _filters.add(new GraphFilter("filter " + _filters.size(), _filters.size()));
   }
   
-  // return number of filters
+  /* return number of filters
+   *
+   */
   public int size() {
     
     return _filters.size();
   }
   
-  // get a filter
+  /* get a filter
+   *
+   */
   public GraphFilter get(int index) {
     return _filters.get(index);
   }
   
-  // erase all of the filters
+  /* erase all of the filters
+   *
+   */
   public void clear() {
     _filters = new ArrayList<GraphFilter>();
     _updated = true;
   }
   
-  public boolean updated() {
-    return _updated;
+	/* there are changes. network needs update
+	 *
+	 */
+  public void makeDirty() {
+		_updated = true;
   }
-  
-  public void ready() {
-    _updated = false;
-  }
+
+	/* there are no more changes. network is fine
+	 *
+	 */
+	public void makeClean() {
+		_updated = false;
+	}
+	
+	/* check if there are any changes
+	 *
+	 */
+	public boolean isClean() {
+		return _updated;
+	}
 }

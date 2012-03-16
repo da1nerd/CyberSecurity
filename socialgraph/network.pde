@@ -147,7 +147,7 @@ class Network {
         addPerson(p, id);
       }
     }
-    fm.ready();
+    fm.makeClean();
   }
   
  /* Draw the network
