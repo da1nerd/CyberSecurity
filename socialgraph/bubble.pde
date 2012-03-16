@@ -8,19 +8,27 @@ class Bubble {
 	
   private int _id;
   private Particle _p;
+  private GraphFilter _gf;
   private float _xpos;
   private float _ypos;
+  private int _size;
+  private boolean _selected;
   
-  public Bubble(Particle p) {
+  public Bubble(Particle p, GraphFilter gf) {
     _id = bubble_id_counter++;
+    _gf = gf;
     
     _p = p;
+    
+    _size = 100;
     
     _xpos = random(-200, 200);
     _ypos = random(-200, 200);
     
     _p.makeFixed();
     _p.position().set(_xpos, _ypos, BELOW_Z_PLANE);
+    
+    _selected = false;
   }
   
   // raise the bubble above everything else so we can select it
@@ -39,6 +47,26 @@ class Bubble {
   
   public Particle getParticle() {
     return _p; 
+  }
+  
+  public boolean isSelected() {
+    return _selected;
+  }
+  
+  public void setSelected() {
+    _selected = true;
+  }
+  
+  public void resetSelected() {
+    _selected = false;
+  }
+  
+  public int getSize() {
+    return _size;
+  }
+  
+  public GraphFilter getGraphFilter() {
+    return _gf; 
   }
 }
 

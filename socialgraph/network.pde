@@ -1,16 +1,24 @@
 import traer.physics.*;
 
+
 //
 // Class holding the whole network
 //
 class Network {
  
+  // color definitions
   final color NODE_COLOR = color(150);
   final color ACTIVE_NODE_COLOR = color(255, 60, 60);
   final color SELECTED_NODE_COLOR = color(255, 0, 0);
   final color CONNECTION_COLOR = color(0, 0, 0);
   final color SELECTED_CONNECTION_COLOR = color(255, 128, 0);
   
+  final float NODE_SIZE = 10;
+  final float EDGE_LENGTH = 20;
+  final float EDGE_STRENGTH = 0.02;
+  final float SPACER_STRENGTH = 120;
+  
+  // panning attributes
   PVector panning = new PVector(0,0);
   PVector tmp_panning = new PVector(0,0);
   
@@ -18,6 +26,9 @@ class Network {
   
   ArrayList<Person> persons = new ArrayList<Person>();
   ArrayList<Bubble> bubbles = new ArrayList<Bubble>();
+  
+  float scale = 1; 
+  float tollerance = 0.9;
     
  /* Constructor
   * 
@@ -29,6 +40,11 @@ class Network {
     physics.setIntegrator( ParticleSystem.RUNGE_KUTTA );
    // physics.setIntegrator( ParticleSystem.MODIFIED_EULER );
   }
+  
+  
+  //
+  // PERSON HANDLING
+  //
   
  /* Add a person to the network
   * 
@@ -117,12 +133,33 @@ class Network {
       if( ((Person)persons.get(i)).selected )
         removePerson(i);
     }
+  }  
+  
+ /* Add a spacer between nodes
+  * 
+  */
+  private void addSpacersToNode( Particle p, Particle r )
+  {
+    for ( int i = 0; i < physics.numberOfParticles(); ++i )
+    {
+      Particle q = physics.getParticle( i );
+      if ( p != q && p != r )
+        physics.makeAttraction( p, q, -SPACER_STRENGTH, 20 );
+    }
+  }
+  
+ /* Create edge between nodes
+  * 
+  */
+  private void makeEdgeBetween( Particle a, Particle b )
+  {
+    physics.makeSpring( a, b, EDGE_STRENGTH, EDGE_STRENGTH, EDGE_LENGTH );
   }
   
  /* Delete the whole network
   * 
   */
-  void clearNetwork() {
+  public void clearNetwork() {
     println("clear the whole network");
     persons.clear();
     bubbles.clear();
@@ -139,8 +176,8 @@ class Network {
     println("Network:updateFilters reloading filters");
     for(int i = 0; i < fm.size(); ++i)
     {
-      int id = createBubble();
       GraphFilter gf = (GraphFilter)fm.get(i);
+      int id = createBubble(gf);
       for(int j = 0; j < gf.size(); ++j)
       {
         Person p = (Person)gf.get(j);
@@ -148,21 +185,6 @@ class Network {
       }
     }
     fm.ready();
-  }
-  
- /* Draw the network
-  * 
-  */
-  void drawNetwork(boolean click, float mx_raw, float my_raw) {
-    
-    physics.tick(); 
-    
-    pushMatrix();
-    translate( width/2 + panning.x , height/2 + panning.y );
-    scale( scale );
-   
-    drawParticles(click, mx_raw, my_raw);    
-    popMatrix();
   }
   
  /* Check if the given coordinates match a node
@@ -250,68 +272,109 @@ class Network {
       ((Person)persons.get(i)).selected = false;
   }
 
- 
   
-  final float NODE_SIZE = 10;
-  final float EDGE_LENGTH = 20;
-  final float EDGE_STRENGTH = 0.02;
-  final float SPACER_STRENGTH = 120;
+  //
+  // VIEW HANDLING
+  //
   
-  float scale = 1;
-  float centroidX = 0;
-  float centroidY = 0;
- 
-  float tollerance = 0.9;
-  
-  
+ /* zoom into
+  * 
+  */
   public void zoomIn() {
     scale *= 1.25;
   }
   
+ /* zoom out
+  * 
+  */
   public void zoomOut() {
     scale *= 0.8;
   }
   
+ /* update the panning while panning
+  * 
+  */
   public void updatePanning(PVector p) {
     panning.x = tmp_panning.x;
     panning.y = tmp_panning.y;
     panning.add(p);  
   }
   
+ /* set the panning (when mouse released)
+  * 
+  */
   public void savePanning() {
     tmp_panning.x = panning.x;
     tmp_panning.y = panning.y;
   }
   
   
+  
+  //
+  // DRAWING
+  //
+  
+  
  /* Draw the network
   * 
   */
-  void drawParticles(boolean click, float mx_raw, float my_raw)
-  { 
-      if(shft_pressed) {
-        drawEdges();
-        drawNodes(mx_raw, my_raw);
-        drawBubbles();
-        // TODO: allow bubble selection 
-        // TODO: display new dialog with filter controls.
-        // display dialog with ff.show(filterObject);
-      } else {
-        drawBubbles();
-        drawEdges();
-        drawNodes(mx_raw, my_raw);
-      }
+  void drawNetwork(boolean click, float mx_raw, float my_raw) {
+    
+    physics.tick(); 
+    
+    pushMatrix();
+    translate( width/2 + panning.x , height/2 + panning.y );
+    scale( scale );
+   
+    if(shft_pressed) {
+      drawEdges();
+      drawNodes(mx_raw, my_raw);
+      drawBubbles(mx_raw, my_raw);
+      
+      // TODO: allow bubble selection 
+      // TODO: display new dialog with filter controls.
+      // display dialog with ff.show(filterObject);
+    
+    } else {
+      drawBubbles(mx_raw, my_raw);
+      drawEdges();
+      drawNodes(mx_raw, my_raw);
+    }
+   
+      
+    popMatrix();
   }
   
   //
   // draw bubbles centers
   //
-  private void drawBubbles() {
+  private void drawBubbles(float mx_raw, float my_raw) {
+    
+    // adjust mouse coordinates to match particle coordinates
+    float mx = (mx_raw - width/2.0 - panning.x) / scale;
+    float my = (my_raw - height/2.0 - panning.y) / scale;
+    
+    
     for ( int i = 0; i < bubbles.size(); ++i )
     {
-      Particle p = bubbles.get(i).getParticle();
-      fill( color(0, 255, 0, 80) );
+      Bubble b = bubbles.get(i);
+      float adjustedTollerance = tollerance  * scale + b.getSize()/ (2.0 * scale);
+      Particle p = b.getParticle();
+      
+      fill( color(0, 255, 0, 60) );
       noStroke();
+      
+      if( b.isSelected() ) {
+        fill( color(0, 255, 0, 90) );
+      }
+      if(abs(p.position().x() - mx) < adjustedTollerance  && 
+         abs(p.position().y() - my) < adjustedTollerance  && 
+         shft_pressed )
+      {
+        strokeWeight(5);
+        stroke(0, 255, 0, 100);
+      }
+
       ellipse( p.position().x(), p.position().y(), 100, 100 );
     }
   }
@@ -393,91 +456,62 @@ class Network {
       } else {
         fill( NODE_COLOR );
       }
-      
+        
       ellipse( v.position().x(), v.position().y(), NODE_SIZE, NODE_SIZE );
+      
+      fill( 0 );
+      stroke( 0 );
+      if( pers.selected ) {
+        textFont( font2 );
+        text( "" + pers.getConnections().size() , v.position().x() + 5, v.position().y() );
+      }
     }
   }
   
   
-// /* Update the centroid of the network
-//  * 
-//  */
-//  void updateCentroid()
-//  {
-//    float 
-//      xMax = Float.NEGATIVE_INFINITY, 
-//      xMin = Float.POSITIVE_INFINITY, 
-//      yMin = Float.POSITIVE_INFINITY, 
-//      yMax = Float.NEGATIVE_INFINITY;
-//  
-//    for ( int i = 0; i < physics.numberOfParticles(); ++i )
-//    {
-//      Particle p = physics.getParticle( i );
-//      xMax = max( xMax, p.position().x() );
-//      xMin = min( xMin, p.position().x() );
-//      yMin = min( yMin, p.position().y() );
-//      yMax = max( yMax, p.position().y() );
-//    }
-//    float deltaX = xMax-xMin;
-//    float deltaY = yMax-yMin;
-//    
-//    centroidX = xMin + 0.5*deltaX;
-//    centroidY = yMin +0.5*deltaY;
-//    
-//    if ( deltaY > deltaX )
-//      scale = height/(deltaY+50);
-//    else
-//      scale = width/(deltaX+50);
-//      
-//    scale = scale > 4 ? 4 : scale;
-//  }
-  
- /* Add a spacer between nodes
+  //
+  // BUBBLE HANDLING STUFF
+  //
+     
+ /* Select bubble
   * 
   */
-  void addSpacersToNode( Particle p, Particle r )
-  {
-    for ( int i = 0; i < physics.numberOfParticles(); ++i )
+  void selectBubble(float mx_raw, float my_raw) {
+    
+    // adjust mouse coordinates to match particle coordinates
+    float mx = (mx_raw - width/2.0 - panning.x) / scale;
+    float my = (my_raw - height/2.0 - panning.y) / scale;
+    
+    for ( int i = 0; i < bubbles.size(); ++i )
     {
-      Particle q = physics.getParticle( i );
-      if ( p != q && p != r )
-        physics.makeAttraction( p, q, -SPACER_STRENGTH, 20 );
+      Bubble b = bubbles.get(i);
+      Particle p = b.getParticle();
+      float adjustedTollerance = tollerance  * scale + b.getSize()/ (2.0 * scale);  
+      
+      if(abs(p.position().x() - mx) < adjustedTollerance  && 
+         abs(p.position().y() - my) < adjustedTollerance  && 
+         shft_pressed )
+      {
+        b.setSelected();
+        ff.show( b.getGraphFilter() );
+        
+      } else {
+        b.resetSelected();
+      }
     }
-  }
-  
- /* Create edge between nodes
-  * 
-  */
-  void makeEdgeBetween( Particle a, Particle b )
-  {
-    physics.makeSpring( a, b, EDGE_STRENGTH, EDGE_STRENGTH, EDGE_LENGTH );
-  }
-  
- /* Add a random node to the network
-  * 
-  */
-  void addRandomNode()
-  { 
-    Particle p = physics.makeParticle();
-    Particle q = physics.getParticle( (int)random( 0, physics.numberOfParticles()-1) );
-    while ( q == p )
-      q = physics.getParticle( (int)random( 0, physics.numberOfParticles()-1) );
-    addSpacersToNode( p, q );
-    makeEdgeBetween( p, q );
-    p.position().set( q.position().x() + random( -1, 1 ), q.position().y() + random( -1, 1 ), 0 );
   }
   
  /* Create a new bubble
   * 
   */
-  public int createBubble() {
+  public int createBubble(GraphFilter _gf) {
     Particle c = physics.makeParticle(1, 1.0,1.0,10.0);
-    Bubble b = new Bubble(c);
+    Bubble b = new Bubble(c, _gf);
     bubbles.add( b );
     return b.getID();
   }
   
- /* Add a random node to the network
+ /* Add person to a bubble
   * 
   */
   public void addPerson2Bubble(Person p, int bubble_id) {

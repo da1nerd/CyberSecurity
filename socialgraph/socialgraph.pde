@@ -8,6 +8,9 @@ FilterManager fm = new FilterManager();
 ControlWindow cw;
 FilterForm ff;
 
+PFont font1;
+PFont font2;
+
 boolean shft_pressed = false;
 boolean ctrl_pressed = false;
 boolean drag = false;
@@ -51,17 +54,19 @@ void setup()
   //createDummyNetwork();
   
   smooth();
-  textFont( loadFont( "SansSerif-14.vlw" ) );
+  font1 = loadFont( "SansSerif-14.vlw" );
+  font2 = loadFont( "Calibri-11.vlw" );
 }
 
 void draw()
-{
+{  
   if(fm._updated == true) {
     network.updateFilters(fm);
   }
   
   background( 255 );
   fill( 0 );
+  textFont( font1 );
   text( "" + network.physics.numberOfParticles() + " PARTICLES\n" + (int)frameRate + " FPS", 10, 20 );
   network.drawNetwork(drag, mouseX, mouseY);  
 }
@@ -72,9 +77,15 @@ void mousePressed()
 {
   if( mouseButton == LEFT )
   {
-    if (mouseEvent.getClickCount() == 2) {
+    if( shft_pressed ) {
+        network.selectBubble(mouseX, mouseY);
+    }
+    else if( mouseEvent.getClickCount() == 2 )
+    {
       network.selectNode(ctrl_pressed, mouseX, mouseY);
-    } else {
+    }
+    else
+    {
       network.selectDragNode(mouseX, mouseY);
     }
     drag = true;
