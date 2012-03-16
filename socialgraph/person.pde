@@ -30,11 +30,8 @@ public class Person {
     return _connections;
   }
   
-  
-  // TODO: Query the actual degree of the node from the database
   public int getDegree() {
-    
-    return -1;
+    return degree;
   }
   
 }
