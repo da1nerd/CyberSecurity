@@ -92,7 +92,7 @@ class FilterForm implements ControlListener {
   
   // show the form for updating an existing filter
   public void show(GraphFilter graphfilter) {
-    ctrlwindow.setTitle("Update a filter");
+    ctrlwindow.setTitle("Editing Filter \"" + graphfilter.name() + "\"");
     updateExisting = true;
     existingFilter = graphfilter;
     

@@ -61,6 +61,13 @@ class GraphFilter {
   public int size() {
     return _people.size();
   }
+	
+	/* get the name of the filter
+	 *
+	 */
+	public String name() {
+		return _name;
+	}
 }
 
 
