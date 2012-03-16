@@ -77,12 +77,13 @@ void mousePressed()
 {
   if( mouseButton == LEFT )
   {
-    if( shft_pressed ) {
-        network.selectBubble(mouseX, mouseY);
-    }
-    else if( mouseEvent.getClickCount() == 2 )
+    if( mouseEvent.getClickCount() == 2 )
     {
-      network.selectNode(ctrl_pressed, mouseX, mouseY);
+      if( shft_pressed ) {
+        network.selectBubble(mouseX, mouseY);
+      } else {
+        network.selectNode(ctrl_pressed, mouseX, mouseY);
+      }
     }
     else
     {
