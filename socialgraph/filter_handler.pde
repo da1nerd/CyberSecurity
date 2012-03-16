@@ -18,7 +18,7 @@ class GraphFilter {
     _people = new ArrayList<Person>();
   }
   
-	/* load 
+	/* load new filter settings
 	 *
 	 */
   public void load(int min_degree, int max_degree, int min_degree_curr_to_prev, int max_degree_curr_to_prev, int min_degree_curr_from_prev, int max_degree_curr_from_prev) {

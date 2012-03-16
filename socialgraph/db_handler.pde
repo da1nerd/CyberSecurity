@@ -173,7 +173,7 @@ class DBManager {
       if(currPerson == -1 || currPerson != db.getInt("person_id")) {
         // just a new person
         if(currPerson != -1 && currPerson != db.getInt("person_id")) {
-          personList.add(new Person(currPerson, currName, contactList));
+          personList.add(new Person(currPerson, currDegree, currName, contactList));
         }
         count = 0;
         currPerson = db.getInt("person_id");

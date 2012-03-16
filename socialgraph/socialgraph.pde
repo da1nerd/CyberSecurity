@@ -51,7 +51,6 @@ void setup()
   }}); 
   
   network = new Network();
-  //createDummyNetwork();
   
   smooth();
   font1 = loadFont( "SansSerif-14.vlw" );
