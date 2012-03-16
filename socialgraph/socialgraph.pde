@@ -7,6 +7,7 @@ DBManager dbm = new DBManager(this);
 FilterManager fm = new FilterManager();
 ControlWindow cw;
 FilterForm ff;
+String DBNAME = "socialgraph.mysql";
 
 PFont font1;
 PFont font2;
@@ -26,7 +27,7 @@ void setup()
   int h = 600;
   size( w, h );
 
-  dbm.connect(dataPath("socialgraph.mysql"));
+  dbm.connect(dataPath(DBNAME));
 
   //
   // Controls
@@ -43,6 +44,11 @@ void setup()
   b2.setPosition(165, 27);
   b2.setLabel("Clear Filters (c)");
   
+	controlP5.Button b3 = controlP5.addButton("Update_Database");
+  b3.setSize(85, 20);
+  b3.setPosition(255, 27);
+  b3.setLabel("Update Database");
+
   ff = new FilterForm(25,35,-1,-1,-1,-1); // set some default form values
   
   addMouseWheelListener(new java.awt.event.MouseWheelListener() { 
@@ -174,3 +180,7 @@ public void Clear_Filters(int v) {
   fm.clear();
 }
 
+public void Update_Database(int v) {
+	dbm.connect(dataPath(DBNAME), true);
+  fm.clear();
+}
