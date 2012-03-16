@@ -161,7 +161,7 @@ class DBManager {
     if(exhaustive) {
       println("DBManager:peopleWithConnections performing exhaustive query");
       // this takes a long time because we collect all of their connections
-      db.query("SELECT pcount.person_id, p.name, ppl.contact_id FROM (SELECT person_id, COUNT(contact_id) as 'count' FROM person_person_link GROUP BY person_id) AS pcount INNER JOIN person_person_link as ppl ON ppl.person_id = pcount.person_id INNER JOIN person as p ON p.id = pcount.person_id WHERE count >= "+min_degree+" AND count <= " + max_degree);
+      db.query("SELECT pcount.person_id AS 'person_id', count AS 'degree', p.name AS 'name', ppl.contact_id AS 'contact_id' FROM (SELECT person_id, COUNT(contact_id) as 'count' FROM person_person_link GROUP BY person_id) AS pcount INNER JOIN person_person_link as ppl ON ppl.person_id = pcount.person_id INNER JOIN person as p ON p.id = pcount.person_id WHERE count >= "+min_degree+" AND count <= " + max_degree);
     } else {
       println("DBManager:peopleWithConnections performing quick query");
       // this is faster because we only select the local connections   
