@@ -463,7 +463,7 @@ class Network {
       stroke( 0 );
       if( pers.selected ) {
         textFont( font2 );
-        text( "" + pers.getConnections().size() , v.position().x() + 5, v.position().y() );
+        text( "" + pers.getDegree() , v.position().x() + 5, v.position().y() );
       }
     }
   }
