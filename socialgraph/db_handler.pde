@@ -9,7 +9,7 @@ class DBManager {
   
   PApplet parent;
   private MySQL db; //SQLite db;
-  
+
   /* constructor
    *
    */
@@ -28,39 +28,12 @@ class DBManager {
    * overload
    */
   Boolean connect(String db_path, Boolean rebuild) {
-    /* PREPARE DATABASE */
-    File f;
-    Boolean newdb = false;
-    
-    f = new File(db_path);
-    if(!f.exists()) {
-      // new database
-      newdb=true;
-      println("DBManager:connect Creating new database: " + f.getPath());
-      try {
-        f.createNewFile();
-      } catch(IOException ex) {
-        println("DBManager:connect ERROR CREATING DATABASE: " + db_path);
-        return false;
-      }
-    } else if(rebuild) {
-      // rebuild existing database
-      println("DBManager:connect Rebulding database: " + f.getPath());
-      try {
-        f.delete();
-        f.createNewFile();
-      } catch(IOException ex) {
-        println("DBManager:connect ERROR REBUILDING DATABASE: " + db_path);
-        return false;
-      }
-    }
-    
-    // open database file
-    db = new MySQL(parent, "localhost", "socialgraph", "root", ""); //db = new SQLite( parent , db_path ); 
+    // open database connection
+    db = new MySQL(parent, "localhost", "socialgraph", "root", "");
     if ( db.connect() )
     {
         // reload the database if nessesary
-        if(rebuild || newdb) { initDB(db); }
+        if(rebuild) { initDB(db); }
     } else {
       println("DBManager:connect FAILED CONNECTING TO DATABASE " + db_path);
       // DIE!
@@ -93,6 +66,7 @@ class DBManager {
     database.execute("CREATE TABLE IF NOT EXISTS person_city_link (person_id INT, city_id INT);");
     database.execute("CREATE TABLE IF NOT EXISTS person_person_link (person_id INT, contact_id INT);");
     database.execute("CREATE TABLE IF NOT EXISTS city_country_link (city_id INT, country_id INT);");
+		println("DBManager:initDB complete");
   }
   
   // insertions

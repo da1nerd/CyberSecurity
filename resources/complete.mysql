@@ -1,0 +1,14 @@
+SELECT person_id, degree, person.name AS 'name', a.contact_id 
+FROM 
+(
+	SELECT pcount.person_id AS 'person_id', pcount.count AS 'degree', ppl.contact_id AS 'contact_id' 
+	FROM 
+	(
+		SELECT person_id, COUNT(contact_id) as 'count' 
+		FROM person_person_link 
+		GROUP BY person_id
+	) as pcount 
+	INNER JOIN person_person_link as ppl ON ppl.person_id = pcount.person_id 
+	WHERE pcount.count >= 25 AND pcount.count <= 35
+) AS a 
+INNER JOIN person ON person.id = a.person_id

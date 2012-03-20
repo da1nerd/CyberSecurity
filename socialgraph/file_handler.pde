@@ -4,14 +4,17 @@
 
 // load the data
 public void load_data() {
+	println("Loading entities...");
   loadEntities(dataPath("Entities_Table.txt"));
-  println("loaded entities");
+  println("complete");
   
+	println("Loading connections...");
   loadConnections(dataPath("Links_Table.txt"));
-  println("loaded connections");
+  println("complete");
   
+	println("Loading geography...");
   loadPersonCityConnection(dataPath("People-Cities.txt"));
-  println("loaded links");
+  println("complete");
 }
 
 // Load all entities and return an ArrayList with nodes

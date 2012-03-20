@@ -184,6 +184,7 @@ class Network {
         addPerson(p, id);
       }
     }
+		println("Network:updateFilters complete");
     fm.makeClean();
   }
   

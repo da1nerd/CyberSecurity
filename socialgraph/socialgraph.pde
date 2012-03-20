@@ -183,4 +183,5 @@ public void Clear_Filters(int v) {
 public void Update_Database(int v) {
 	dbm.connect(dataPath(DBNAME), true);
   fm.clear();
+	load_data();
 }
