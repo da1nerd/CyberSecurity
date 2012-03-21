@@ -192,9 +192,9 @@ class FilterManager {
 	  f.load(min_degree, max_degree, min_degree_curr_to_prev, max_degree_curr_to_prev, min_degree_curr_from_prev, max_degree_curr_from_prev, get(filter_index -1), get(filter_index + 1));
 	  
 	  // reload the previous filters
-    for(int i = filter_index -1; i >= 0; i --) {
-      reloadFilter(i);
-    }
+    // for(int i = filter_index -1; i >= 0; i --) {
+    //   reloadFilter(i);
+    // }
     
     // // reload the filter again to take advantage of propagated effects from previous filters
     // // yes we reload all the previous filters all over again (see reloadFilter)
