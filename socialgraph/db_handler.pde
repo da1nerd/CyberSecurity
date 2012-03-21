@@ -127,7 +127,7 @@ class DBManager {
   // TODO: verify that these queries are accurate (there is a discrepancy between the fast and slow one, that causes me to question the validity of each.
   ArrayList<Person> peopleWithConnections(int min_degree, int max_degree, Boolean exhaustive) {
     ArrayList<Person> personList = new ArrayList<Person>();
-    ArrayList<Integer> contactList = new ArrayList<Integer>();
+    ArrayList<Connection> contactList = new ArrayList<Connection>();
     int currPerson = -1;
 		int currDegree = -1;
     String currName = "";
@@ -153,11 +153,11 @@ class DBManager {
         currPerson = db.getInt("person_id");
 				currDegree = db.getInt("degree");
         currName = db.getString("name");
-        contactList = new ArrayList<Integer>();
+        contactList = new ArrayList<Connection>();
       }
       // build the contact list
       count ++;
-      contactList.add(db.getInt("contact_id"));
+      contactList.add(new Connection(db.getInt("contact_id"), true));
     }  
     return personList;
   }

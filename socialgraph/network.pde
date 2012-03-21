@@ -54,7 +54,7 @@ class Network {
     
     // add connections
     boolean update_success = true;
-    ArrayList<Integer> con = pers.getConnections();
+    ArrayList<Connection> con = pers.getConnections();
     println("connections " + pers.getID() + " to "  + con);
     for(int j = 0; j < persons.size(); ++j)
     {
@@ -62,7 +62,7 @@ class Network {
       boolean found = false;
       for(int i = 0; i < con.size(); ++i)
       {
-        if( con.get(i) == persons.get(j).getID() ) {
+        if( con.get(i).getID() == persons.get(j).getID() ) {
           found = true;
           break;
         }

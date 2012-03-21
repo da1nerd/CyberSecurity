@@ -5,14 +5,14 @@ public class Person {
   
   private int _id;
   private String _name;
-  private ArrayList _connections = new ArrayList<Integer>();
+  private ArrayList<Connection> _connections = new ArrayList<Connection>();
   private Particle _p;
   private int _degree;
   private float _draw_size;
   
   public boolean selected;
 
-  public Person(int id, int degree, String name, ArrayList<Integer> con) {
+  public Person(int id, int degree, String name, ArrayList<Connection> con) {
     _id = id;
     _degree = degree;
     _name = name;
@@ -38,7 +38,7 @@ public class Person {
     return _p;
   }
   
-  public ArrayList<Integer> getConnections() {
+  public ArrayList<Connection> getConnections() {
     return _connections;
   }
   

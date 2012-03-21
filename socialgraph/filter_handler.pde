@@ -1,5 +1,6 @@
 class GraphFilter {
   String _name; // name of filter
+	private int _id;
   int _order; // order amongst other filters (0...n)
   private ArrayList<Person> _people; // people collected by this filter
   // range of total degree
@@ -12,7 +13,8 @@ class GraphFilter {
   int _min_degree_curr_from_prev = -1;
   int _max_degree_curr_from_prev = -1;
   
-  GraphFilter(String name, int order) {
+  GraphFilter(int id, String name, int order) {
+		_id = id;
     _name = name;
     _order = order;
     _people = new ArrayList<Person>();
@@ -39,6 +41,7 @@ class GraphFilter {
      }
    }
    
+	// TODO: can tables be returned by the database, which can then be querried?
    // query the database
    _people = dbm.peopleWithConnections(_min_degree,_max_degree, false);
    println("GraphFilter:load loaded " + _people.size() + " nodes into filter \"" + _name + "\"");
@@ -68,8 +71,16 @@ class GraphFilter {
 	public String name() {
 		return _name;
 	}
+	
+	/* return the filtered data set as a list of connections
+	 *
+	 */
+	public ArrayList<Connection> toConnections() {
+		ArrayList<Connection> con = new ArrayList<Connection>();
+		// TODO: iterate and convert to connections
+		return con;
+	}
 }
-
 
 /* Class to handle the filters
  *
@@ -77,7 +88,8 @@ class GraphFilter {
 class FilterManager {
   private ArrayList<GraphFilter> _filters;
   private Boolean _updated;
-  
+  private int _id_tic = -1; // id ticker for internal filter filter
+
   FilterManager() {
     _filters = new ArrayList<GraphFilter>();
     _updated = false;
@@ -88,9 +100,16 @@ class FilterManager {
    */
   public void addFilter() {
     // initialize new filter with default name and order
-    _filters.add(new GraphFilter("filter " + _filters.size(), _filters.size()));
+    _filters.add(new GraphFilter(generateID(),"filter " + _filters.size(), _filters.size()));
   }
   
+	/* generate a unique id for the filter
+	 *
+	 */
+	private int generateID() {
+		return _id_tic ++;
+	}
+
   /* return number of filters
    *
    */
