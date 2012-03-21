@@ -63,7 +63,7 @@ class GraphFilter {
       }
     }
 		// query the database
-		_people = dbm.peopleWithConnections(_min_degree,_max_degree, false, required_backward_connections_set, _min_degree_curr_to_prev, _max_degree_curr_to_prev, required_forward_connections_set, min_next_degree, max_next_degree);
+		_people = dbm.peopleWithConnections(_min_degree,_max_degree, required_backward_connections_set, _min_degree_curr_to_prev, _max_degree_curr_to_prev, required_forward_connections_set, min_next_degree, max_next_degree);
 		println("GraphFilter:load loaded " + _people.size() + " nodes into filter \"" + _name + "\"");
   }
   
