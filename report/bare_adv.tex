@@ -870,7 +870,7 @@ Figure \ref{fig_datatables} depicts on the left side the table with the entities
 \label{fig_datatables}
 \end{figure}
 
-\subsection{Task 1}
+
 The client believes that an employee has communicated with his/her handler(s) through the Flitter network, however they do not know the Flitter name of the handler nor of the espionage organization. But they believe that the associated network may take one of two forms of social structures are described as follows:
 
 A. The employee has about 40 Flitter contacts.  Three of these contacts are his "handlers", people in the criminal organization assigned to obtain his cooperation.  Each of the handlers probably has between 30 to 40 Flitter contacts and share a common middle man in the organization, who is code-named Boris. Boris maintains contact with the handlers, but does not allow them to communicate among themselves using Flitter.  Boris communicates with one or two others in the organization and no one else. One of these contacts is his likely boss, who is code-named Fearless Leader.  Fearless Leader probably has a broad Flitter network (well over 100 links), including international contacts. See \ref{fig_network_A}.
@@ -891,7 +891,7 @@ B. The employee has about 40 Flitter contacts.  Three of these contacts are his 
 \label{fig_network_B}
 \end{figure}
 
-Thus the first task is to search for the closest match scenario and provide the social network structure of the criminal ring.
+Thus our task is to search for the closest match scenario and provide the social network structure of the criminal ring.
 
 \section{Related Work}
 
@@ -931,7 +931,7 @@ These main questions stated by the problem statement can be divided into more sp
 Since the given dataset is large and the problem statement tends to be solvable by filtering the data, we introduce a filtering technique that may be applied to the data set. Our main design allows a user to add as many filters as desired. Relationships may be defined between two filters to help facilitate the logical ordering of the social hierarchy. That is, a filter can search for a node degree range as well as the number of required connections to a previously filtered set of nodes. Defining a range of required connections between two filters will also act as an intersection of the two filtered data sets, and provide the user with a narrower set of data that matches their specifications.
 
 \subsection{Data Encoding}
-Through the design process we decided to use a standard network graph based on the following arguments: A network graph can show connections very efficiently so long as there is no need to display the whole graph -- a performance issue in our case. Filters can be implemented by adding ``Bubbles''. Bubbles are groups of nodes and make the comparison of the network structure to the given structure easier. Furthermore most users are very familiar with this type of visualization.
+Through the design process we decided to use a standard network graph based on the following arguments: A network graph can show connections very efficiently so long as there is no need to display the whole graph -- a performance issue in our case. Filters can be implemented by adding ``Bubbles''. Bubbles are groups of nodes and make the comparison of the network structure to the given structure easier. Furthermore most users are familiar with this type of visualization.
 
 Table \ref{table_01} shows the data given by the problem statement and the filtering as well as the encoding we chose.
 
