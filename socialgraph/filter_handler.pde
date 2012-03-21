@@ -23,8 +23,8 @@ class GraphFilter {
 	/* load new filter settings
 	 *
 	 */
-  public void load(int min_degree, int max_degree, int min_degree_curr_to_prev, int max_degree_curr_to_prev, int min_degree_curr_from_prev, int max_degree_curr_from_prev) {
-   GraphFilter prev_filter = null;;
+  public void load(int min_degree, int max_degree, int min_degree_curr_to_prev, int max_degree_curr_to_prev, int min_degree_curr_from_prev, int max_degree_curr_from_prev, GraphFilter prev_filter) {
+   String required_connections_set = "";
    _min_degree = min_degree;
    _max_degree = max_degree;
    _min_degree_curr_to_prev = min_degree_curr_to_prev;
@@ -32,18 +32,22 @@ class GraphFilter {
    _min_degree_curr_from_prev = min_degree_curr_from_prev;
    _max_degree_curr_from_prev = max_degree_curr_from_prev;
    
-   // look up the previous filter
-   if((_min_degree_curr_to_prev != -1 && _max_degree_curr_to_prev != -1) || (_min_degree_curr_from_prev != -1 && _max_degree_curr_from_prev != -1)) {
-     for(int i = 0; i < fm._filters.size(); i ++) {
-       if(fm._filters.get(i)._order == _order -1); {
-         prev_filter = fm._filters.get(i);
-       }
-     }
-   }
+  // look up the previous filter
+  if( prev_filter != null) {
+		for(int i = 0; i < prev_filter.size(); i ++) {
+			if(i == 0) {
+				required_connections_set += prev_filter.get(i).getID();
+			} else {
+				required_connections_set += "," + prev_filter.get(i).getID();
+			}
+		}
+	} else {
+		required_connections_set = "-1";
+	}
    
 	// TODO: can tables be returned by the database, which can then be querried?
    // query the database
-   _people = dbm.peopleWithConnections(_min_degree,_max_degree, false);
+   _people = dbm.peopleWithConnections(_min_degree,_max_degree, false, required_connections_set);
    println("GraphFilter:load loaded " + _people.size() + " nodes into filter \"" + _name + "\"");
   }
   
@@ -65,6 +69,10 @@ class GraphFilter {
     return _people.size();
   }
 	
+	public int getOrder() {
+		return _order;
+	}
+	
 	/* get the name of the filter
 	 *
 	 */
@@ -73,11 +81,13 @@ class GraphFilter {
 	}
 	
 	/* return the filtered data set as a list of connections
-	 *
+	 * TODO: do we need this??
 	 */
 	public ArrayList<Connection> toConnections() {
 		ArrayList<Connection> con = new ArrayList<Connection>();
-		// TODO: iterate and convert to connections
+		for(int i = 0; i < _people.size(); i ++) {
+			con.add(new Connection(_people.get(i).getID(), true));
+		}
 		return con;
 	}
 }
@@ -122,7 +132,11 @@ class FilterManager {
    *
    */
   public GraphFilter get(int index) {
-    return _filters.get(index);
+		if(index >= 0 && index < size()) {
+			return _filters.get(index);
+		} else {
+			return null;
+		}
   }
   
   /* erase all of the filters

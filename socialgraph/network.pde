@@ -55,7 +55,7 @@ class Network {
     // add connections
     boolean update_success = true;
     ArrayList<Connection> con = pers.getConnections();
-    println("connections " + pers.getID() + " to "  + con);
+    // println("connections " + pers.getID() + " to "  + con);
     for(int j = 0; j < persons.size(); ++j)
     {
       Particle p2 = persons.get(j).getParticle();
@@ -69,10 +69,10 @@ class Network {
       }
       
       if( found ) {
-        println(j + ": makespring");
+        // println(j + ": makespring");
         physics.makeSpring( p, p2, EDGE_STRENGTH, EDGE_STRENGTH, EDGE_LENGTH + pow(pers.getNodeDrawSize(), 1.3) );
       } else {
-        println(j + ": makeattraction");
+        // println(j + ": makeattraction");
         physics.makeAttraction( p, p2, -SPACER_STRENGTH, 20 );
       }
     }

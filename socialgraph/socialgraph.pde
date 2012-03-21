@@ -50,7 +50,7 @@ void setup()
   b3.setPosition(255, 27);
   b3.setLabel("Update Database");
 
-  ff = new FilterForm(25,35,-1,-1,-1,-1); // set some default form values
+  ff = new FilterForm(35,45,-1,-1,-1,-1); // set some default form values
   
   addMouseWheelListener(new java.awt.event.MouseWheelListener() { 
     public void mouseWheelMoved(java.awt.event.MouseWheelEvent evt) { 

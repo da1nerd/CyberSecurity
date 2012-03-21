@@ -9,8 +9,8 @@ class FilterForm implements ControlListener {
 
   
   FilterForm(int p1, int p2, int p3, int p4, int p5, int p6) {  
-	int h = 300;
-	int w = 300;
+		int h = 300;
+		int w = 300;
     ctrlwindow = controlP5.addControlWindow("newFilterWindow",screen.width/2-w/2,screen.height/2-h/2,w,h);
     ctrlwindow.hideCoordinates();
     ctrlwindow.hide();
@@ -133,7 +133,7 @@ class FilterForm implements ControlListener {
   
   private void loadFilter(GraphFilter gf) {
     // TODO: error check
-    gf.load(parseInt(fieldMinDeg.getText()),parseInt(fieldMaxDeg.getText()),parseInt(fieldMinDegToPrev.getText()),parseInt(fieldMaxDegToPrev.getText()),parseInt(fieldMinDegFromPrev.getText()),parseInt(fieldMaxDegFromPrev.getText()));
+    gf.load(parseInt(fieldMinDeg.getText()),parseInt(fieldMaxDeg.getText()),parseInt(fieldMinDegToPrev.getText()),parseInt(fieldMaxDegToPrev.getText()),parseInt(fieldMinDegFromPrev.getText()),parseInt(fieldMaxDegFromPrev.getText()),fm.get(gf.getOrder()-1));
     fm.makeDirty();
     ctrlwindow.hide();
   }
