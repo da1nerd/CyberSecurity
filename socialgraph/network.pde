@@ -94,6 +94,7 @@ class Network {
     
     println("update all connections");
    
+    // go through all the persons
     for(int i = 0; i < persons.size(); ++i)
     {
       Particle p1 = persons.get(i).getParticle();
@@ -103,6 +104,8 @@ class Network {
       ArrayList<Spring> springs = getSpringsConnected2Particle(p1);
       ArrayList<Attraction> attractions = getAttractionsConnected2Particle(p1);
       
+      // and the go through all persons again to determine if there is
+      // a connection to add
       for(int k = 0; k < persons.size(); ++k)
       {       
         Particle p2 = persons.get(k).getParticle();
@@ -144,7 +147,7 @@ class Network {
           float edge_strength = EDGE_STRENGTH;
           float edge_length = EDGE_LENGTH;
           if(persons.get(i).getBubbleID() != persons.get(k).getBubbleID()) {
-            edge_strength = EDGE_STRENGTH/10;
+            edge_strength = EDGE_STRENGTH/100;
             edge_length = EDGE_LENGTH*5;
           }
           
@@ -617,6 +620,7 @@ class Network {
         
       ellipse( v.position().x(), v.position().y(), pers.getNodeDrawSize(), pers.getNodeDrawSize() );
       
+      // show text
       fill( 0 );
       stroke( 0 );
       if( pers.selected || hover ) {
@@ -717,7 +721,11 @@ class Network {
     return b.getID();
   }
   
-  public int searchBubbleByID(int id) {
+  
+ /* Return the index of the bubble list
+  * 
+  */
+  private int searchBubbleByID(int id) {
     int index = -1;
     for(int i = 0; i < bubbles.size(); ++i)
     {
@@ -742,6 +750,9 @@ class Network {
     }
   }
   
+ /* Select a bubble to drag
+  * 
+  */
   int last_bubble_selection = -1;
   void selectDragBubble(float mx_raw, float my_raw) {
     int i = checkBubbleHit(mx_raw, my_raw);
