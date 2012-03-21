@@ -9,36 +9,29 @@ class Bubble {
   private int _id;
   private Particle _p;
   private GraphFilter _gf;
-  private float _xpos;
-  private float _ypos;
   private int _size;
   private boolean _selected;
   
   public Bubble(Particle p, GraphFilter gf) {
     _id = bubble_id_counter++;
     _gf = gf;
-    
     _p = p;
-    
     _size = 100;
-    
-    _xpos = random(-200, 200);
-    _ypos = random(-200, 200);
-    
     _p.makeFixed();
-    _p.position().set(_xpos, _ypos, BELOW_Z_PLANE);
     
     _selected = false;
   }
   
   // raise the bubble above everything else so we can select it
   public void raise() {
-	_p.position().set(_xpos, _ypos, ABOVE_Z_PLANE);
+    PVector pos = new PVector(_p.position().x(), _p.position().y());
+    _p.position().set(pos.x, pos.y, ABOVE_Z_PLANE);
   }
   
   // lower the bubble so that it lies beneath everything else
   public void lower() {
-	_p.position().set(_xpos, _ypos, BELOW_Z_PLANE);
+    PVector pos = new PVector(_p.position().x(), _p.position().y());
+    _p.position().set(pos.x, pos.y, BELOW_Z_PLANE);
   }
   
   public int getID() {
@@ -67,6 +60,15 @@ class Bubble {
   
   public GraphFilter getGraphFilter() {
     return _gf; 
+  }
+  
+  public PVector getPosition() {
+    return new PVector(_p.position().x(), _p.position().y()); 
+  }
+  
+  public void setPosition(PVector pos) {
+    float z = _p.position().z();
+    _p.position().set(pos.x, pos.y, z);
   }
 }
 

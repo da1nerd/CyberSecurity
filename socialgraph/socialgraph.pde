@@ -14,7 +14,8 @@ PFont font2;
 
 boolean shft_pressed = false;
 boolean ctrl_pressed = false;
-boolean drag = false;
+boolean drag_node = false;
+boolean drag_bubble = false;
 boolean pan_scene = false;
 
 PVector last_mouse_pos = new PVector(0,0);
@@ -73,7 +74,7 @@ void draw()
   fill( 0 );
   textFont( font1 );
   text( "" + network.physics.numberOfParticles() + " PARTICLES\n" + (int)frameRate + " FPS", 10, 20 );
-  network.drawNetwork(drag, mouseX, mouseY);  
+  network.drawNetwork(mouseX, mouseY);  
 }
 
 /* USER INTERACTION */
@@ -94,11 +95,12 @@ void mousePressed()
     {
       if( shft_pressed ) {
         network.selectDragBubble(mouseX, mouseY);
+        drag_bubble = true;
       } else {
         network.selectDragNode(mouseX, mouseY);
+        drag_node = true;
       }
     }
-    drag = true;
   }
   
   if( mouseButton == RIGHT )
@@ -110,8 +112,11 @@ void mousePressed()
 
 void mouseDragged()
 {
-  if(drag)
+  if(drag_node)
     network.dragNode(mouseX, mouseY);
+    
+  if(drag_bubble)
+    network.dragBubble(mouseX, mouseY);
     
   if(pan_scene)
     network.updatePanning(new PVector(mouseX-last_mouse_pos.x, mouseY-last_mouse_pos.y));
@@ -119,7 +124,8 @@ void mouseDragged()
 
 void mouseReleased() {
   network.releaseDragNode();
-  drag = false;
+  drag_node = false;
+  drag_bubble = false;
   
   if(pan_scene) {
     pan_scene = false;

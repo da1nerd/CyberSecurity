@@ -28,7 +28,7 @@ class Network {
   ArrayList<Bubble> bubbles = new ArrayList<Bubble>();
   
   float scale = 1; 
-  float tollerance = 0.9;
+  final float TOLLERANCE = 0.1;
     
  /* Constructor
   * 
@@ -50,27 +50,42 @@ class Network {
   * 
   */
   void addPerson(Person pers, int bubble_id) {
-  
-    persons.add( pers );
-    
-    // add particle
-    pers._p = physics.makeParticle();
+    Particle p = physics.makeParticle();
     
     // add connections
     boolean update_success = true;
-    for(int i = 0; i < pers._connections.size(); ++i)
+    ArrayList<Integer> con = pers.getConnections();
+    println("connections " + pers.getID() + " to "  + con);
+    for(int j = 0; j < persons.size(); ++j)
     {
-      for(int j = 0; j < persons.size(); ++j)
+      Particle p2 = persons.get(j).getParticle();
+      boolean found = false;
+      for(int i = 0; i < con.size(); ++i)
       {
-        if( (Integer)((pers._connections).get(i)) == ((Person)persons.get(j))._id )
-        {
-          //println("add connections: " +  pers._id + " to " + ((Person)persons.get(j))._id);
-          addSpacersToNode( pers._p, ((Person)persons.get(j))._p );
-          makeEdgeBetween( pers._p, ((Person)persons.get(j))._p );
+        if( con.get(i) == persons.get(j).getID() ) {
+          found = true;
+          break;
         }
       }
+      
+      if( found ) {
+        println(j + ": makespring");
+        physics.makeSpring( p, p2, EDGE_STRENGTH, EDGE_STRENGTH, EDGE_LENGTH + pow(pers.getNodeDrawSize(), 1.3) );
+      } else {
+        println(j + ": makeattraction");
+        physics.makeAttraction( p, p2, -SPACER_STRENGTH, 20 );
+      }
     }
-    pers._p.position().set( random( -1, 1 ), random( -1, 1 ), 0 );
+    
+    int i = searchBubbleByID(bubble_id);
+    PVector position = new PVector( random( -1, 1 ), random( -1, 1 ) );
+    if(i >= 0) {
+      position.add(bubbles.get(i).getPosition());
+    }
+    p.position().set( position.x, position.y, 0 );
+    
+    pers.setParticle( p );
+    persons.add( pers );
     
     // add the person to a bubble
     addPerson2Bubble(pers, bubble_id);
@@ -124,6 +139,7 @@ class Network {
     persons.remove(index);
   }
     
+    
  /* Delete a person from the network
   * 
   */
@@ -134,27 +150,6 @@ class Network {
         removePerson(i);
     }
   }  
-  
- /* Add a spacer between nodes
-  * 
-  */
-  private void addSpacersToNode( Particle p, Particle r )
-  {
-    for ( int i = 0; i < physics.numberOfParticles(); ++i )
-    {
-      Particle q = physics.getParticle( i );
-      if ( p != q && p != r )
-        physics.makeAttraction( p, q, -SPACER_STRENGTH, 20 );
-    }
-  }
-  
- /* Create edge between nodes
-  * 
-  */
-  private void makeEdgeBetween( Particle a, Particle b )
-  {
-    physics.makeSpring( a, b, EDGE_STRENGTH, EDGE_STRENGTH, EDGE_LENGTH );
-  }
   
  /* Delete the whole network
   * 
@@ -188,23 +183,36 @@ class Network {
     fm.makeClean();
   }
   
+  private PVector adjustMouseCoords(PVector pos) {
+    return adjustMouseCoords(pos.x, pos.y);
+  }
+  
+  private PVector adjustMouseCoords(float mx, float my) {
+    PVector pos = new PVector(
+      (mx - width/2.0 - panning.x) / scale,
+      (my - height/2.0 - panning.y) / scale
+    );
+    return pos;
+  }
+  
+  
  /* Check if the given coordinates match a node
   * 
   */
   int checkNodeHit(float mx_raw, float my_raw) {
     
-    // adjust mouse coordinates to match particle coordinates
-    float mx = (mx_raw - width/2.0 - panning.x) / scale;
-    float my = (my_raw - height/2.0 - panning.y) / scale;
-    float adjustedTollerance = tollerance  * scale + NODE_SIZE/ (2.0 * scale);
+    PVector m_pos = adjustMouseCoords(mx_raw, my_raw);
     
     for ( int i = 0; i < persons.size(); ++i )
     {
       Person pers = (Person)persons.get(i);
       Particle v = pers.getParticle();
-
-      if(abs(v.position().x() - mx) < adjustedTollerance  && 
-         abs(v.position().y() - my) < adjustedTollerance)
+      float adjToll = (1+TOLLERANCE) + pers.getNodeDrawSize() / 2.;
+      
+      PVector pos = new PVector(v.position().x(), v.position().y());
+      pos.sub(m_pos);
+      
+      if( pos.mag() < adjToll )
       {
         return i;
       }
@@ -222,7 +230,12 @@ class Network {
       resetSelection();
 
     int i = checkNodeHit(mx_raw, my_raw);
-    if( i >= 0) ((Person)persons.get(i)).selected = true;
+    if( i >= 0) {
+      Person p = persons.get(i);
+      persons.remove(i);
+      p.selected = true;
+      persons.add(p);
+    }
   }
   
   int last_selection = -1;
@@ -237,16 +250,13 @@ class Network {
   */
   void dragNode(float mx_raw, float my_raw) {
     
-    // adjust mouse coordinates to match particle coordinates
-    float mx = (mx_raw - width/2.0 - panning.x) / scale;
-    float my = (my_raw - height/2.0 - panning.y) / scale;
-    float adjustedTollerance = tollerance  * scale + NODE_SIZE/ (2.0 * scale);
+    PVector m_pos = adjustMouseCoords(mx_raw, my_raw);
     
     if(last_selection >= 0)
     {
       Person pers = (Person)persons.get(last_selection);
       Particle v = pers.getParticle();
-      v.position().set(mx, my, 0);
+      v.position().set(m_pos.x, m_pos.y, 0);
     }
   }
     
@@ -319,7 +329,7 @@ class Network {
  /* Draw the network
   * 
   */
-  void drawNetwork(boolean click, float mx_raw, float my_raw) {
+  void drawNetwork(float mx_raw, float my_raw) {
     
     physics.tick(); 
     
@@ -351,15 +361,14 @@ class Network {
   //
   private void drawBubbles(float mx_raw, float my_raw) {
     
-    // adjust mouse coordinates to match particle coordinates
-    float mx = (mx_raw - width/2.0 - panning.x) / scale;
-    float my = (my_raw - height/2.0 - panning.y) / scale;
-    
+    PVector m_pos = adjustMouseCoords(mx_raw, my_raw);
     
     for ( int i = 0; i < bubbles.size(); ++i )
     {
       Bubble b = bubbles.get(i);
-      float adjustedTollerance = tollerance  * scale + b.getSize()/ (2.0 * scale);
+      float adjToll = (1+TOLLERANCE) * b.getSize() / 2.0;
+      PVector pos = b.getPosition();
+      pos.sub(m_pos);
       Particle p = b.getParticle();
       
       fill( color(0, 255, 0, 60) );
@@ -368,15 +377,22 @@ class Network {
       if( b.isSelected() ) {
         fill( color(0, 255, 0, 90) );
       }
-      if(abs(p.position().x() - mx) < adjustedTollerance  && 
-         abs(p.position().y() - my) < adjustedTollerance  && 
-         shft_pressed )
+      if( pos.mag() <= adjToll && shft_pressed )
       {
         strokeWeight(5);
         stroke(0, 255, 0, 100);
       }
 
-      ellipse( p.position().x(), p.position().y(), 100, 100 );
+      ellipse( p.position().x(), p.position().y(), b.getSize(), b.getSize() );
+      
+      if( pos.mag() <= adjToll && shft_pressed )
+      {
+        textAlign( CENTER );
+        textFont( font2 );
+        stroke( 0 );
+        fill( 0 );
+        text( "" + b.getGraphFilter()._name , p.position().x(), p .position().y() );
+      }
     }
   }
   
@@ -429,12 +445,8 @@ class Network {
   private void drawNodes(float mx_raw, float my_raw) {
 
     ellipseMode( CENTER );
-    
-    // adjust mouse coordinates to match particle coordinates
-    float mx = (mx_raw - width/2.0 - panning.x) / scale;
-    float my = (my_raw - height/2.0 - panning.y) / scale;
-    float adjustedTollerance = tollerance  * scale + NODE_SIZE/ (2.0 * scale);
-    
+    PVector m_pos = adjustMouseCoords(mx_raw, my_raw);
+
     // draw vertices
     fill( 160 );
     for ( int i = 0; i < persons.size(); ++i )
@@ -442,10 +454,16 @@ class Network {
       Person pers = (Person)persons.get(i);
       Particle v = pers.getParticle();
       
+      float adjToll = (1+TOLLERANCE) + pers.getNodeDrawSize() / 2.;
+      PVector pos = new PVector( v.position().x(), v.position().y() );
+      pos.sub(m_pos);
+      
       strokeWeight(0.5);
+      boolean hover = false;
       stroke(255, 255, 255);
-      if(abs(v.position().x() - mx) < adjustedTollerance  && abs(v.position().y() - my) < adjustedTollerance)
+      if( pos.mag() < adjToll )
       {
+        hover = true;
         strokeWeight(1);
         stroke(255, 0, 0);
       }
@@ -458,13 +476,21 @@ class Network {
         fill( NODE_COLOR );
       }
         
-      ellipse( v.position().x(), v.position().y(), NODE_SIZE, NODE_SIZE );
+      ellipse( v.position().x(), v.position().y(), pers.getNodeDrawSize(), pers.getNodeDrawSize() );
       
       fill( 0 );
       stroke( 0 );
-      if( pers.selected ) {
+      if( pers.selected || hover ) {
+        noStroke();
+        fill(235, 235, 235, 210);
+        rect(v.position().x() + pers.getNodeDrawSize()/2, v.position().y() - 20, 80, 24);
+        
+        textAlign( LEFT );
         textFont( font2 );
-        text( "" + pers.getDegree() , v.position().x() + 5, v.position().y() );
+        stroke( 0 );
+        fill( 0 );
+        text( "" + pers.getDegree() , v.position().x() + pers.getNodeDrawSize()/2 + 2, v.position().y() - 9 );
+        text( "" + pers.getName() , v.position().x() + pers.getNodeDrawSize()/2 + 2, v.position().y()  );
       }
     }
   }
@@ -477,28 +503,41 @@ class Network {
  /* Select bubble
   * 
   */
-  void selectBubble(float mx_raw, float my_raw) {
+  private int checkBubbleHit(float mx_raw, float my_raw) {
     
-    // adjust mouse coordinates to match particle coordinates
-    float mx = (mx_raw - width/2.0 - panning.x) / scale;
-    float my = (my_raw - height/2.0 - panning.y) / scale;
+    PVector m_pos = adjustMouseCoords(mx_raw, my_raw);
     
     for ( int i = 0; i < bubbles.size(); ++i )
     {
       Bubble b = bubbles.get(i);
-      Particle p = b.getParticle();
-      float adjustedTollerance = tollerance  * scale + b.getSize()/ (2.0 * scale);  
+      Particle v = b.getParticle();
+      float adjToll = (1+TOLLERANCE) + b.getSize() / 2.;
       
-      if(abs(p.position().x() - mx) < adjustedTollerance  && 
-         abs(p.position().y() - my) < adjustedTollerance  && 
-         shft_pressed )
+      PVector pos = new PVector( v.position().x(), v.position().y() );
+      pos.sub(m_pos);
+      
+      
+      if( pos.mag() < adjToll )
       {
-        b.setSelected();
-        ff.show( b.getGraphFilter() );
-        
-      } else {
-        b.resetSelected();
+        return i;
       }
+    }
+    return -1;
+  }
+     
+ /* Select bubble
+  * 
+  */
+  public void selectBubble(float mx_raw, float my_raw) {
+    
+    for ( int i = 0; i < bubbles.size(); ++i )
+      bubbles.get(i).resetSelected();
+      
+    int i = checkBubbleHit(mx_raw, my_raw);
+    if(i >= 0 && shft_pressed )
+    {
+      bubbles.get(i).setSelected();
+      ff.show( bubbles.get(i).getGraphFilter() );
     }
   }
   
@@ -506,10 +545,49 @@ class Network {
   * 
   */
   public int createBubble(GraphFilter _gf) {
-    Particle c = physics.makeParticle(1, 1.0,1.0,10.0);
+    
+    PVector mean = new PVector(0, 0);
+    float x_max = 0;
+    for(int i = 0; i < bubbles.size(); ++i) {
+      PVector pos = bubbles.get(i).getPosition();
+      mean.add(pos);
+      
+      if( x_max < pos.x )
+        x_max = pos.x;
+    }
+    if( bubbles.size() > 0 ) {
+      mean.div( bubbles.size() );
+      x_max += 300;
+    }
+    
+    Particle c = physics.makeParticle();
+    c.position().set(x_max, mean.y, 0);
     Bubble b = new Bubble(c, _gf);
     bubbles.add( b );
+    
+    PVector mean_new = new PVector(0, 0);
+    for(int i = 0; i < bubbles.size(); ++i) {
+      mean_new.add(bubbles.get(i).getPosition());
+    }
+    mean_new.div( bubbles.size() );
+    mean_new.mult(-1);
+    
+    panning.set( mean_new );
+    tmp_panning.set( mean_new );
+    
     return b.getID();
+  }
+  
+  public int searchBubbleByID(int id) {
+    int index = -1;
+    for(int i = 0; i < bubbles.size(); ++i)
+    {
+      if( ((Bubble)bubbles.get(i)).getID() == id ) {
+        index = i;
+        break;
+      }
+    }
+    return index;
   }
   
  /* Add person to a bubble
@@ -517,22 +595,31 @@ class Network {
   */
   public void addPerson2Bubble(Person p, int bubble_id) {
     
-    int i = 0;
-    for(; i < bubbles.size(); ++i)
-    {
-      if( ((Bubble)bubbles.get(i)).getID() == bubble_id )
-        break;
+    int i = searchBubbleByID(bubble_id);
+    if(i >= 0) {
+      Particle c = bubbles.get(i).getParticle();
+      physics.makeSpring( p.getParticle(), c, 0.001, 0.001, 50);
     }
-    
-    Particle c = ((Bubble)bubbles.get(i)).getParticle();
-    physics.makeSpring( p.getParticle(), c, 0.001, 0.001, 50);
   }
   
   int last_bubble_selection = -1;
   void selectDragBubble(float mx_raw, float my_raw) {
-//    int i = checkNodeHit(mx_raw, my_raw);
-//    if( i >= 0) ((Person)persons.get(i)).getParticle().makeFixed();
-//    last_selection = i;
+    int i = checkBubbleHit(mx_raw, my_raw);
+    last_bubble_selection = i;
+  }
+
+ /* Drag a node
+  * 
+  */
+  void dragBubble(float mx_raw, float my_raw) {
+    
+    PVector m_pos = adjustMouseCoords(mx_raw, my_raw);
+    
+    if(last_bubble_selection >= 0)
+    {
+      Particle v = bubbles.get(last_bubble_selection).getParticle();
+      v.position().set(m_pos.x, m_pos.y, 0);
+    }
   }
 
 }

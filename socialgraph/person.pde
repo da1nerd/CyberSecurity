@@ -8,6 +8,7 @@ public class Person {
   private ArrayList _connections = new ArrayList<Integer>();
   private Particle _p;
   private int _degree;
+  private float _draw_size;
   
   public boolean selected;
 
@@ -17,10 +18,20 @@ public class Person {
     _name = name;
     _connections = con;
     selected = false;
+    
+    _draw_size = sqrt(6 * _degree);
+  }
+  
+  public String getName() {
+    return _name; 
   }
   
   public int getID() {
     return _id;
+  }
+  
+  public void setParticle(Particle p) {
+    _p = p; 
   }
   
   public Particle getParticle() {
@@ -33,6 +44,10 @@ public class Person {
   
   public int getDegree() {
     return _degree;
+  }
+  
+  public float getNodeDrawSize() {
+    return _draw_size; 
   }
   
 }
