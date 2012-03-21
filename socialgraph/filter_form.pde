@@ -5,7 +5,8 @@ class FilterForm implements ControlListener {
   private controlP5.Button okButton, cancelbutton, resetbutton;
   private boolean updateExisting;
   private GraphFilter existingFilter;
-  
+  // TODO: checkbox to dis-allow inter-communication.
+
   
   FilterForm(int p1, int p2, int p3, int p4, int p5, int p6) {  
 	int h = 300;

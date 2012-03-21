@@ -78,7 +78,7 @@
 % should be used if it is desired that the figures are to be displayed in
 % draft mode.
 %
-\documentclass[12pt,journal,compsoc]{IEEEtran}
+\documentclass[12pt,journal]{IEEEtran} % compsoc removed for osx
 % The Computer Society requires 12pt.
 % If IEEEtran.cls has not been installed into the LaTeX system files,
 % manually specify the path to it like:
@@ -769,10 +769,7 @@ pdfkeywords={Computer Society, IEEEtran, journal, LaTeX, paper,
 \IEEEcompsoctitleabstractindextext{%
 \begin{abstract}
 %\boldmath
-
-Abstract (VAST challenge, what we chose, what is in the paper)
-
-
+The VAST Challenge is offered every year as part of the Infovis conference. The contest has the purpose of pushing the forefront of visual analytics tools using benchmark data sets and establishing a forum to advance visual analytics evaluation methods. The challenge consists of one or more mini Challenges which can be solved independently and can result, by bringing them together, in the Grand Challenge. We have chosen the "Social Network and Geospatial" mini challenge from 2009 in which officials have received intelligence that a terrorist group operating within a social network have recruited a government employee. Designing an advanced interactive visualization will allow the terrorist social hierarchy to be discovered within the social network, and the identity of key people of interest to be discovered.
 \end{abstract}
 % IEEEtran.cls defaults to using nonbold math in the Abstract.
 % This preserves the distinction between vectors and scalars. However,
@@ -860,21 +857,23 @@ InfoVis, VAST Challenge, Social Network, Network Graph.
 %% (should never be an issue)
 %I wish you the best of success.
 
-\IEEEPARstart{E}{mbassy} employees are known to have use the social networking/micro-blogging tool, Flitter, to communicate with colleagues and friends. The Flitter network may provide a connection to a criminal ring that may have recruited an employee. We have been provided with Flitter data that we may analyze.
+\IEEEPARstart{E}{mbassy} employees are known to have used the social networking/micro-blogging tool, Flitter, to communicate with colleagues and friends. However, the Flitter network has also been used by a criminal ring that may have recruited an employee. We have been provided with Flitter logs and have been instructed to analyze the data in order to determine the identities of key contacts within the criminal ring.
 
-There will be three tab-delimited tables. One describing entities that is either a user-name, a city or a country. The other table contains links between the users as well as links from cities to countries and the last table describes the user-to-city links. The dataset includes 6000 people from 12 different cities out of 4 countries whereby there are 29'888 person-to-person connections. There is also a map provided of Flovania, its major cities, and information about neighboring countries and their major cities. The datasets used for these challenges are synthetic:  that is, they are a blend of computer- and human-generated data. Figure \ref{fig_datatables} depicts on the left side the table with the entities and on the right side on the top an example of the person-to-city and on the bottom the person-to-person link table.
+The Flitter logs consists of three tab-delimited files. The first log file describes a list of entities, which may define users, cities, or countries. The second log file contains communication links between the users as well as geographical links that match cities to countries. The last log file describes the geographical location of users by defining user-to-city links. The provided dataset includes 6000 people from 12 different cities out of 4 countries whereby there are 29'888 person-to-person connections. A map of Flovania has also been provided and includes details regarding its major cities and information about neighboring countries. The datasets used for these challenges are synthetic:  that is, they are a blend of computer- and human-generated data and should not be regarded as representative of any geographical location, people group, or social network.
+
+Figure \ref{fig_datatables} depicts on the left side the table with the entities and on the right side on the top an example of the person-to-city and on the bottom the person-to-person link table.
 
 \begin{figure}[h]
 \centering
 \includegraphics[width=2.5in]{tables.png}
-\caption{Given Data}
+\caption{Excerpts from Flitter log files}
 \label{fig_datatables}
 \end{figure}
 
 \subsection{Task 1}
 The client believes that an employee communicated with his/her handler(s) through Flitter network, however they do not know the Flitter name of the handler nor of the espionage organization. But they believe that the associated network may take one of two forms of social structures described as follows:
 
-A. The employee has about 40 Flitter contacts.  Three of these contacts are his "handlers", people in the criminal organization assigned to obtain his cooperation.  Each of the handlers probably has between 30 to 40 Flitter contacts and share a common middle man in the organization, who is code-named Boris. Boris maintains contact with the handlers, but does not allow them to communicate among themselves using Flitter.  Boris communicates with one or two others in the organization and no one else. One of these contacts is his likely boss, who is code-named Fearless Leader.  Fearless Leader probably has a broad Flitter network (well over 100 links), including international contacts.
+A. The employee has about 40 Flitter contacts.  Three of these contacts are his "handlers", people in the criminal organization assigned to obtain his cooperation.  Each of the handlers probably has between 30 to 40 Flitter contacts and share a common middle man in the organization, who is code-named Boris. Boris maintains contact with the handlers, but does not allow them to communicate among themselves using Flitter.  Boris communicates with one or two others in the organization and no one else. One of these contacts is his likely boss, who is code-named Fearless Leader.  Fearless Leader probably has a broad Flitter network (well over 100 links), including international contacts. See \ref{fig_network_A}.
 
 \begin{figure}[h]
 \centering
@@ -883,7 +882,7 @@ A. The employee has about 40 Flitter contacts.  Three of these contacts are his 
 \label{fig_network_A}
 \end{figure}
 
-B. The employee has about 40 Flitter contacts.  Three of these contacts are his "handlers", people in the organization assigned to obtain his cooperation.  Each of the handlers likely has between 30 to 40 Flitter contacts, and each probably has his or her own middle man in the organization, who are code-named Boris, Morris and Horace. It is probable the middle men will not allow the handlers to communicate among themselves using Flitter.  Each of the middle men probably communicate with one or two others in the organization, and no one else.  One of the contacts for all of the middle men is the head of the organization, Fearless Leader.  Fearless Leader has a broad Flitter network (well over 100 links) including international contacts.  
+B. The employee has about 40 Flitter contacts.  Three of these contacts are his "handlers", people in the organization assigned to obtain his cooperation.  Each of the handlers likely has between 30 to 40 Flitter contacts, and each probably has his or her own middle man in the organization, who are code-named Boris, Morris and Horace. It is probable the middle men will not allow the handlers to communicate among themselves using Flitter.  Each of the middle men probably communicate with one or two others in the organization, and no one else.  One of the contacts for all of the middle men is the head of the organization, Fearless Leader.  Fearless Leader has a broad Flitter network (well over 100 links) including international contacts. See \ref{fig_network_B}.
 
 \begin{figure}[h]
 \centering
@@ -900,19 +899,28 @@ In the article "Visualizing Social Networks", Linton Freeman reviews the long hi
 
 Anthony Dekker discusses in the paper "Conceptual Distance in Social Network Analysis" an approach to social network analysis based on a concept of distance between people. The distance between two people can be any encoding of the relationship e.g. how often they communicate or the cultural distance and so on. In the conclusion the author claims that the introduced distance is a concept that the human brain is skilled at thinking about and visually judging. \cite{dekker05}
 
-Another source of a lot of related work is called VisualComplexity.com. VisualComplexity.com is a visual exploration on mapping complex networks founded by Manuel Lima. This website is intented to be a unified resource space for anyone interested in the visualization of networks. \cite{lima12}
+Another source of a lot of related work is called VisualComplexity.com. VisualComplexity.com is a visual exploration on mapping complex networks founded by Manuel Lima. This website is intended to be a unified resource space for anyone interested in the visualization of networks. \cite{lima12}
 
 
 
 \section{Design}
+\label{sec:design}
 
-Can we identify a criminal network structure? Which of the two given social structures, A or B, most closely match the scenario you have identified in the data? What role does geographic location play in the social network and in the network of the criminals? These main questions stated by the problem statement can be divided into more specific questions such as: What is the name of the suspected employee? What are the names of the persons and the positions they hold within the criminal network? And so on. The goal of this chapter is to introduce our design aimed to answer these questions. For a more elaborated question section see our design justification document.
+\begin{quote}
+Can we identify a criminal network structure? 
+
+Which of the two given social structures, A or B, most closely match the scenario you have identified in the data? 
+
+What role does geographic location play in the social network and in the network of the criminals? 
+\end{quote}
+	
+These main questions stated by the problem statement can be divided into more specific questions such as: What is the name of the suspected employee? What are the names of the persons and the positions they hold within the criminal network? And so on. The goal of this chapter is to introduce our design aimed to answer these questions. For a more elaborated question section see our design justification document.
 
 \subsection{Filtering}
-Since the given dataset is big and the problem statement tends to be solvable by filtering the data we introduce a filter technique applied on the nodes. Our main design allows a user to add as many filter as he wants whereby the filter can have a relationship to the previous filter. That is a filter can search for a node degree range as well as the number of connections to a previous filter. Furthermore the filter can influence the previous filter by defining the number of connections from filter 1 to filter 2 and thus more narrow selection of the nodes in set 1.
+Since the given dataset is large and the problem statement tends to be solvable by filtering the data, we introduce a filtering technique that may be applied to the data set. Our main design allows a user to add as many filters as desired. Relationships may be defined between two filters to help facilitate the logical ordering of the social hierarchy. That is, a filter can search for a node degree range as well as the number of required connections to a previously filtered set of nodes. Defining a range of required connections between two filters will also act as an intersection of the two filtered data sets, and provide the user with a narrower set of data that matches their specifications.
 
 \subsection{Data Encoding}
-Through the design process we decided to use a standard network graph based on the following arguments: A network graph can show connections very efficient if there is no need to display the whole graph. Filters can be implemented by adding ”Bubbles” these are groups of nodes and the comparison is easy of the network structure to the given structure. Furthermore most users are very familiar with this type of visualization.
+Through the design process we decided to use a standard network graph based on the following arguments: A network graph can show connections very efficiently so long as there is no need to display the whole graph -- See Section \ref{sec:database}. Filters can be implemented by adding ”Bubbles” these are groups of nodes and the comparison is easy of the network structure to the given structure. Furthermore most users are very familiar with this type of visualization.
 
 Table \ref{table_01} shows the data given by the problem statement and the filtering as well as the encoding we chose.
 
@@ -941,11 +949,16 @@ Filters are formed to what we call ”Bubbles”. Every filter is placed on a fi
 
 \section{Implementation}
 
-\subsection{Database}
+how we built everything.
 
+\subsection{Database}
+\label{sec:database}
+
+stuff about database
 
 \section{Results}
 
+the results of our work
 
 % An example of a floating figure using the graphicx package.
 % Note that \label must occur AFTER (or within) \caption.
