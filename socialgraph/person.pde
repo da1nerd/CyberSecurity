@@ -9,6 +9,7 @@ public class Person {
   private Particle _p;
   private int _degree;
   private float _draw_size;
+  private int _bubble_id;
   
   public boolean selected;
 
@@ -18,6 +19,7 @@ public class Person {
     _name = name;
     _connections = con;
     selected = false;
+    _bubble_id = -1;
     
     _draw_size = sqrt(6 * _degree);
   }
@@ -48,6 +50,14 @@ public class Person {
   
   public float getNodeDrawSize() {
     return _draw_size; 
+  }
+  
+  public void setBubbleID(int bubble_id) {
+    _bubble_id = bubble_id;
+  }
+  
+  public int getBubbleID() {
+    return _bubble_id;
   }
   
 }

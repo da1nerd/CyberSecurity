@@ -104,7 +104,7 @@ class Network {
       ArrayList<Attraction> attractions = getAttractionsConnected2Particle(p1);
       
       for(int k = 0; k < persons.size(); ++k)
-      {
+      {       
         Particle p2 = persons.get(k).getParticle();
         
         // search if there is already a spring between the two particles
@@ -140,10 +140,19 @@ class Network {
         // if yes, then connect them
         if( connect )
         {
+          // use another strength if it is an interbubble connection
+          float edge_strength = EDGE_STRENGTH;
+          float edge_length = EDGE_LENGTH;
+          if(persons.get(i).getBubbleID() != persons.get(k).getBubbleID()) {
+            edge_strength = EDGE_STRENGTH/10;
+            edge_length = EDGE_LENGTH*5;
+          }
+          
+          
           // if no spring exists create one
           if( existing_spring == -1 ) {
-            physics.makeSpring( p1, p2, EDGE_STRENGTH, EDGE_STRENGTH,
-              EDGE_LENGTH + pow(persons.get(i).getNodeDrawSize(), 1.3) );
+            physics.makeSpring( p1, p2, edge_strength, edge_strength,
+              edge_length + pow(persons.get(i).getNodeDrawSize(), 1.3) );
           }
           // if there is repulsion remove it
           if( existing_attraction >= 0) {
@@ -332,7 +341,21 @@ class Network {
   void selectNode(boolean ctrl, float mx_raw, float my_raw) {
         
     if(!ctrl)
+    {
       resetSelection();
+      
+      // delete connections between bubbles
+      for(int i = 0; i < persons.size(); ++i) {
+        Person p = persons.get(i);
+        for(int m = 0; m < p.getConnections().size(); ++m) {
+          int index = findPersonIndex( p.getConnections().get(m).getID() );
+          if( index >= 0) {
+            if( p.getBubbleID() != persons.get(index).getBubbleID() )
+              p.getConnections().get(m).setVisibility(false);
+          }
+        }
+      }
+    }
 
     int i = checkNodeHit(mx_raw, my_raw);
     if( i >= 0) {
@@ -340,7 +363,18 @@ class Network {
       persons.remove(i);
       p.selected = true;
       persons.add(p);
+      
+    
+      // set the connections to other bubbles
+      for(int m = 0; m < p.getConnections().size(); ++m) {
+        int index = findPersonIndex( p.getConnections().get(m).getID() );
+        if( index >= 0) {
+          if( p.getBubbleID() != persons.get(index).getBubbleID() )
+            p.getConnections().get(m).setVisibility(true);
+        }
+      } 
     }
+    updateConnections();
   }
   
   int last_selection = -1;
@@ -704,6 +738,7 @@ class Network {
     if(i >= 0) {
       Particle c = bubbles.get(i).getParticle();
       physics.makeSpring( p.getParticle(), c, 0.001, 0.001, 50);
+      p.setBubbleID(i);
     }
   }
   
