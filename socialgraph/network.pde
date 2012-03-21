@@ -530,7 +530,7 @@ class Network {
         textFont( font2 );
         stroke( 0 );
         fill( 0 );
-        text( "" + b.getGraphFilter()._name , p.position().x(), p .position().y() );
+        text( "" + b.getGraphFilter()._name + "(" + b.getGraphFilter().size() + ")", p.position().x(), p .position().y() );
       }
     }
   }

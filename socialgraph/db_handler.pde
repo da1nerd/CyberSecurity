@@ -126,7 +126,7 @@ class DBManager {
   // return a list of people that have at least total_degree connections.
   // TODO: verify that these queries are accurate (there is a discrepancy between the fast and slow one, that causes me to question the validity of each.
 	// TODO: inserting a string directly into the query is not exactly secure but it will work for the time being.
-  ArrayList<Person> peopleWithConnections(int min_degree, int max_degree, Boolean exhaustive, String required_connections_set) {
+  ArrayList<Person> peopleWithConnections(int min_degree, int max_degree, Boolean exhaustive, String required_backward_connections_set, int min_degree_curr_to_prev, int max_degree_curr_to_prev, String required_forward_connections_set, int min_degree_to_next, int max_degree_to_next) {
     ArrayList<Person> personList = new ArrayList<Person>();
     ArrayList<Connection> contactList = new ArrayList<Connection>();
     int currPerson = -1;
@@ -136,24 +136,44 @@ class DBManager {
     if(exhaustive) {
       println("DBManager:peopleWithConnections performing exhaustive query");
       // this takes a long time because we collect all of their connections
-      db.query("SELECT pcount.person_id AS 'person_id', count AS 'degree', p.name AS 'name', ppl.contact_id AS 'contact_id' IF(b.contact_id IN (" + required_connections_set + "), false, true) AS 'hidden' FROM (SELECT person_id, COUNT(contact_id) as 'count' FROM person_person_link GROUP BY person_id) AS pcount INNER JOIN person_person_link as ppl ON ppl.person_id = pcount.person_id INNER JOIN person as p ON p.id = pcount.person_id WHERE count >= "+min_degree+" AND count <= " + max_degree);
+      db.query("SELECT pcount.person_id AS 'person_id', count AS 'degree', p.name AS 'name', ppl.contact_id AS 'contact_id' IF(b.contact_id IN (" + required_backward_connections_set + "), false, true) AS 'hidden' FROM (SELECT person_id, COUNT(contact_id) as 'count' FROM person_person_link GROUP BY person_id) AS pcount INNER JOIN person_person_link as ppl ON ppl.person_id = pcount.person_id INNER JOIN person as p ON p.id = pcount.person_id WHERE count >= "+min_degree+" AND count <= " + max_degree);
     } else {
       println("DBManager:peopleWithConnections performing quick query");
       // this is faster because we only select the local connections   
-
-			// TODO: new but performance is bad. it returns all of the connections, but bubble connections marked
-			db.query("SELECT person_id, degree, person.name AS 'name', a.contact_id, IF(a.contact_id IN (" + required_connections_set + "), false, true) AS 'hidden' FROM (SELECT pcount.person_id AS 'person_id', pcount.count AS 'degree', ppl.contact_id AS 'contact_id' FROM (SELECT person_id, COUNT(contact_id) as 'count' FROM person_person_link GROUP BY person_id) as pcount INNER JOIN person_person_link as ppl ON ppl.person_id = pcount.person_id WHERE pcount.count >= "+min_degree+" AND pcount.count <= "+max_degree+") AS a INNER JOIN person ON person.id = a.person_id WHERE person_id NOT IN (" + required_connections_set + ")");
+      
+			if(required_backward_connections_set != "-1" && required_forward_connections_set != "-1") {
+			  // middle filters
+			  println("middle filter");
+			  db.query("SELECT person_id, degree, prev_degree, next_degree, person.name AS 'name', a.contact_id, IF(a.contact_id IN (" + required_backward_connections_set + ") OR a.contact_id IN (" + required_forward_connections_set + "), false, true) AS 'visible' FROM (SELECT pcount.person_id AS 'person_id', pcount.count AS 'degree', pcount.prev_count AS 'prev_degree', pcount.next_count AS 'next_degree', ppl.contact_id AS 'contact_id' FROM (SELECT pplink.person_id, COUNT(contact_id) as 'count', prev_count.prev_count as 'prev_count', next_count.next_count as 'next_count' FROM person_person_link AS pplink INNER JOIN (SELECT person_id, COUNT(*) AS 'prev_count' FROM person_person_link WHERE contact_id IN (" + required_backward_connections_set + ") GROUP BY person_id) AS prev_count ON prev_count.person_id = pplink.person_id INNER JOIN (SELECT person_id, COUNT(*) AS 'next_count' FROM person_person_link WHERE contact_id IN (" + required_forward_connections_set + ") GROUP BY person_id) AS next_count ON next_count.person_id = pplink.person_id GROUP BY person_id) as pcount INNER JOIN person_person_link as ppl ON ppl.person_id = pcount.person_id WHERE pcount.count >= "+min_degree+" AND pcount.count <= "+max_degree+" AND pcount.prev_count >= " + min_degree_to_next + " AND pcount.prev_count <= " + max_degree_to_next + " AND pcount.next_count >= " + min_degree_curr_to_prev + " AND pcount.next_count <= " + max_degree_curr_to_prev +") AS a INNER JOIN person ON person.id = a.person_id");
+        
+		  } else if(required_forward_connections_set != "-1") {
+		    // first filter
+		    println("first filter");
+			  db.query("SELECT person_id, degree, prev_degree, person.name AS 'name', a.contact_id, IF(a.contact_id IN (" + required_forward_connections_set + "), false, true) AS 'visible' FROM (SELECT pcount.person_id AS 'person_id', pcount.count AS 'degree', pcount.prev_count AS 'prev_degree', ppl.contact_id AS 'contact_id' FROM (SELECT pplink.person_id, COUNT(contact_id) as 'count', prev_count.prev_count as 'prev_count' FROM person_person_link AS pplink INNER JOIN (SELECT person_id, COUNT(*) AS 'prev_count' FROM person_person_link WHERE contact_id IN (" + required_forward_connections_set + ") GROUP BY person_id) AS prev_count ON prev_count.person_id = pplink.person_id GROUP BY person_id) as pcount INNER JOIN person_person_link as ppl ON ppl.person_id = pcount.person_id WHERE pcount.count >= "+min_degree+" AND pcount.count <= "+max_degree+" AND pcount.prev_count >= " + min_degree_to_next + " AND pcount.prev_count <= " + max_degree_to_next + ") AS a INNER JOIN person ON person.id = a.person_id");
+        
+			} else if(required_backward_connections_set != "-1") {
+			  // end filter
+			  println("end filter");
+				// can additionally filter by degree to previous filtered set.
+				db.query("SELECT person_id, degree, prev_degree, person.name AS 'name', a.contact_id, IF(a.contact_id IN (" + required_backward_connections_set + "), false, true) AS 'visible' FROM (SELECT pcount.person_id AS 'person_id', pcount.count AS 'degree', pcount.prev_count AS 'prev_degree', ppl.contact_id AS 'contact_id' FROM (SELECT pplink.person_id, COUNT(contact_id) as 'count', prev_count.prev_count as 'prev_count' FROM person_person_link AS pplink INNER JOIN (SELECT person_id, COUNT(*) AS 'prev_count' FROM person_person_link WHERE contact_id IN (" + required_backward_connections_set + ") GROUP BY person_id) AS prev_count ON prev_count.person_id = pplink.person_id GROUP BY person_id) as pcount INNER JOIN person_person_link as ppl ON ppl.person_id = pcount.person_id WHERE pcount.count >= "+min_degree+" AND pcount.count <= "+max_degree+" AND pcount.prev_count >= " + min_degree_curr_to_prev + " AND pcount.prev_count <= " + max_degree_curr_to_prev + ") AS a INNER JOIN person ON person.id = a.person_id");
+				// old that prevents nodes in a previous filtered set to be displayed
+				// db.query("SELECT person_id, degree, prev_degree, person.name AS 'name', a.contact_id, IF(a.contact_id IN (" + required_connections_set + "), false, true) AS 'visible' FROM (SELECT pcount.person_id AS 'person_id', pcount.count AS 'degree', pcount.prev_count AS 'prev_degree', ppl.contact_id AS 'contact_id' FROM (SELECT pplink.person_id, COUNT(contact_id) as 'count', prev_count.prev_count as 'prev_count' FROM person_person_link AS pplink INNER JOIN (SELECT person_id, COUNT(*) AS 'prev_count' FROM person_person_link WHERE contact_id IN (" + required_connections_set + ") GROUP BY person_id) AS prev_count ON prev_count.person_id = pplink.person_id GROUP BY person_id) as pcount INNER JOIN person_person_link as ppl ON ppl.person_id = pcount.person_id WHERE pcount.count >= "+min_degree+" AND pcount.count <= "+max_degree+" AND pcount.prev_count >= " + min_degree_curr_to_prev + " AND pcount.prev_count <= " + max_degree_curr_to_prev + ") AS a INNER JOIN person ON person.id = a.person_id WHERE person_id NOT IN (" + required_connections_set + ")");
+			} else {
+			  println("single filter");
+			  // single filter
+				db.query("SELECT person_id, degree, person.name AS 'name', a.contact_id, IF(a.contact_id IN (" + required_backward_connections_set + "), false, true) AS 'visible' FROM (SELECT pcount.person_id AS 'person_id', pcount.count AS 'degree', ppl.contact_id AS 'contact_id' FROM (SELECT person_id, COUNT(contact_id) as 'count' FROM person_person_link GROUP BY person_id) as pcount INNER JOIN person_person_link as ppl ON ppl.person_id = pcount.person_id WHERE pcount.count >= "+min_degree+" AND pcount.count <= "+max_degree+") AS a INNER JOIN person ON person.id = a.person_id WHERE person_id NOT IN (" + required_backward_connections_set + ")");
+			}
 			// original
       //db.query("SELECT person_id, degree, person.name AS 'name', b.contact_id, IF(b.contact_id IN (" + required_connections_set + "), false, true) AS 'hidden' FROM (SELECT pcount.person_id AS 'person_id', pcount.count AS 'degree', ppl.contact_id AS 'contact_id' FROM (SELECT person_id, COUNT(contact_id) as 'count' FROM person_person_link GROUP BY person_id) as pcount INNER JOIN person_person_link as ppl ON ppl.person_id = pcount.person_id WHERE pcount.count >= "+min_degree+" AND pcount.count <= "+max_degree+") AS a INNER JOIN (SELECT pfilter.person_id, contact_filter.contact_id FROM (SELECT person_id as 'contact_id', COUNT(contact_id) as 'count' FROM person_person_link GROUP BY person_id) AS contact_filter INNER JOIN person_person_link as pfilter on pfilter.contact_id = contact_filter.contact_id WHERE contact_filter.count >= "+min_degree+" AND contact_filter.count <= "+max_degree+") AS b USING (person_id, contact_id) INNER JOIN person ON person.id = b.person_id WHERE person_id NOT IN (" + required_connections_set + ")");
     }
     int count = 0;
-String tmp = "";
+//String tmp = "";
     while(db.next()) {
       // init and new person
       if(currPerson == -1 || currPerson != db.getInt("person_id")) {
         // just a new person
         if(currPerson != -1 && currPerson != db.getInt("person_id")) {
-	tmp += ","+ currPerson;
+//	tmp += ","+ currPerson;
           personList.add(new Person(currPerson, currDegree, currName, contactList));
         }
         count = 0;
@@ -164,9 +184,9 @@ String tmp = "";
       }
       // build the contact list
       count ++;
-      contactList.add(new Connection(db.getInt("contact_id"), db.getBoolean("hidden")));
+      contactList.add(new Connection(db.getInt("contact_id"), db.getBoolean("visible")));
     }  
-println(tmp);
+//println(tmp);
     return personList;
   }
 }
