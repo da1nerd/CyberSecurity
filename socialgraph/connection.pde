@@ -23,4 +23,8 @@ class Connection {
 	public boolean isVisible() {
 		return _visible;
 	}
+
+    public void setVisibility(boolean visible) {
+      _visible = visible;
+    }
 }
