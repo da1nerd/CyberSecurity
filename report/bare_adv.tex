@@ -899,9 +899,20 @@ In the article "Visualizing Social Networks", Linton Freeman reviews the long hi
 
 Anthony Dekker discusses in the paper "Conceptual Distance in Social Network Analysis" an approach to social network analysis based on a concept of distance between people. The distance between two people can be any encoding of the relationship e.g. how often they communicate or the cultural distance and so on. In the conclusion the author claims that the introduced distance is a concept that the human brain is skilled at thinking about and visually judging. \cite{dekker05}
 
-Another source of a lot of related work is called VisualComplexity.com. VisualComplexity.com is a visual exploration on mapping complex networks founded by Manuel Lima. This website is intended to be a unified resource space for anyone interested in the visualization of networks. \cite{lima12}
+Another source of a lot of related work is called VisualComplexity.com. VisualComplexity.com is a visual exploration on mapping complex networks founded by Manuel Lima. This website is intended to be a unified resource space for anyone interested in the visualization of networks. \cite{lima12} One project we discovered on Visual Complexity was the Fidg't social network visualizer. \cite{fidgt07} 
 
+\begin{quote} 
+The Fidg't Visualizer allows you to play around with your network. You interface with the Visualizer through Flickr and LastFM tags, using any tag to create a Magnet. Once a Tag Magnet is created, members of the network will gravitate towards it if they have photos or music with that same Tag.
+\end{quote}
 
+\begin{figure}[h]
+\centering
+\includegraphics[width=3.5in]{fidgt.jpg}
+\caption{Fidg't Social Network Visualization}
+\label{fig_fidgt}
+\end{figure}
+
+Unfortunately the Fidg't website is no longer active, however you can read up on it at Visual Complexity or use a web archive engine to find older version of the website from which you can find the source code.
 
 \section{Design}
 \label{sec:design}
@@ -1099,25 +1110,25 @@ The conclusion goes here.
 %\section{}
 %Appendix two text goes here.
 
-
-% use section* for acknowledgement
-\ifCLASSOPTIONcompsoc
-  % The Computer Society usually uses the plural form
-  \section*{Acknowledgments}
-\else
-  % regular IEEE prefers the singular form
-  \section*{Acknowledgment}
-\fi
-
-
-The authors would like to thank...
-
-
-% Can use something like this to put references on a page
-% by themselves when using endfloat and the captionsoff option.
-\ifCLASSOPTIONcaptionsoff
-  \newpage
-\fi
+% 
+% % use section* for acknowledgement
+% \ifCLASSOPTIONcompsoc
+%   % The Computer Society usually uses the plural form
+%   \section*{Acknowledgments}
+% \else
+%   % regular IEEE prefers the singular form
+%   \section*{Acknowledgment}
+% \fi
+% 
+% 
+% The authors would like to thank Ron Metoyer 
+% 
+% 
+% % Can use something like this to put references on a page
+% % by themselves when using endfloat and the captionsoff option.
+% \ifCLASSOPTIONcaptionsoff
+%   \newpage
+% \fi
 
 
 
@@ -1163,7 +1174,11 @@ Manuel Lima, Visual Complexity, \emph{\url{www.visualcomplexity.com}}, 2012.
 \bibitem{visweek09}
 VisWeek 2009, IEEE VAST Challenge 2009, \emph{\url{http://hcil.cs.umd.edu/localphp/hcil/vast/index.php/taskdesc/index}}, 2009.
 
+\bibitem{fidgt07}
+Figd't 2007, Visual Complexity, \emph{\url{http://www.visualcomplexity.com/vc/project.cfm?id=497}}, 2007.
+
 \end{thebibliography}
+
 
 
 % You can push biographies down or up by placing
