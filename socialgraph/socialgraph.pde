@@ -73,6 +73,7 @@ void draw()
   background( 255 );
   fill( 0 );
   textFont( font1 );
+  textAlign( LEFT );
   text( "" + network.physics.numberOfParticles() + " PARTICLES\n" + (int)frameRate + " FPS", 10, 20 );
   network.drawNetwork(mouseX, mouseY);  
 }
