@@ -49,34 +49,12 @@ class Network {
  /* Add a person to the network
   * 
   */
-  void addPerson(Person pers, int bubble_id) {
+  void addPerson(Person pers, int bubble_id, boolean update_connections) {
+    
+    // create new particle
     Particle p = physics.makeParticle();
     
-    // add connections
-    boolean update_success = true;
-    ArrayList<Connection> con = pers.getConnections();
-    println("connections " + pers.getID() + " to "  + con);
-    for(int j = 0; j < persons.size(); ++j)
-    {
-      Particle p2 = persons.get(j).getParticle();
-      boolean found = false;
-      for(int i = 0; i < con.size(); ++i)
-      {
-        if( con.get(i).getID() == persons.get(j).getID() ) {
-          found = true;
-          break;
-        }
-      }
-      
-      if( found ) {
-        println(j + ": makespring");
-        physics.makeSpring( p, p2, EDGE_STRENGTH, EDGE_STRENGTH, EDGE_LENGTH + pow(pers.getNodeDrawSize(), 1.3) );
-      } else {
-        println(j + ": makeattraction");
-        physics.makeAttraction( p, p2, -SPACER_STRENGTH, 20 );
-      }
-    }
-    
+    // search the bubbles position to init node at this position
     int i = searchBubbleByID(bubble_id);
     PVector position = new PVector( random( -1, 1 ), random( -1, 1 ) );
     if(i >= 0) {
@@ -84,12 +62,138 @@ class Network {
     }
     p.position().set( position.x, position.y, 0 );
     
+    // add the person to the network
     pers.setParticle( p );
     persons.add( pers );
     
     // add the person to a bubble
     addPerson2Bubble(pers, bubble_id);
+    
+    // update all connections
+    if(update_connections)
+      updateConnections();
   }
+  
+  /* Find the index of a person
+  * 
+  */
+  private int findPersonIndex(int id) {
+    for(int i = 0; i < persons.size(); ++i)
+    {
+      if(persons.get(i).getID() == id)
+        return i;
+    }
+    return -1;
+  }
+  
+  /* Update the connections of the whole network
+  * --> Very slow but does everything
+  * 
+  */
+  public void updateConnections() {
+    
+    println("update all connections");
+   
+    for(int i = 0; i < persons.size(); ++i)
+    {
+      Particle p1 = persons.get(i).getParticle();
+      ArrayList<Connection> con = persons.get(i).getConnections();
+      
+      // get springs and attractions connected to node 1
+      ArrayList<Spring> springs = getSpringsConnected2Particle(p1);
+      ArrayList<Attraction> attractions = getAttractionsConnected2Particle(p1);
+      
+      for(int k = 0; k < persons.size(); ++k)
+      {
+        Particle p2 = persons.get(k).getParticle();
+        
+        // search if there is already a spring between the two particles
+        int existing_spring = -1;
+        for(int l = 0; l < springs.size(); ++l) {
+          if((springs.get(l).getOneEnd() == p1 && springs.get(l).getTheOtherEnd() == p2) ||
+             (springs.get(l).getOneEnd() == p2 && springs.get(l).getTheOtherEnd() == p1)) {
+            existing_spring = l;
+            break;
+          }
+        }
+        
+        // search if there is already an attraction between the twwo particles
+        int existing_attraction = -1;
+        for(int l = 0; l < attractions.size(); ++l) {
+          if((attractions.get(l).getOneEnd() == p1 && attractions.get(l).getTheOtherEnd() == p2) ||
+             (attractions.get(l).getOneEnd() == p2 && attractions.get(l).getTheOtherEnd() == p1)) {
+            existing_attraction = l;
+            break;
+          }
+        }
+        
+        // check if the two nodes have a connection
+        boolean connect = false;
+        for(int j = 0; j < con.size(); ++j)
+        {
+          if( (con.get(j).getID() == persons.get(k).getID()) && con.get(j).isVisible() ) {
+            connect = true;
+            break;
+          }
+        }
+        
+        // if yes, then connect them
+        if( connect )
+        {
+          // if no spring exists create one
+          if( existing_spring == -1 ) {
+            physics.makeSpring( p1, p2, EDGE_STRENGTH, EDGE_STRENGTH,
+              EDGE_LENGTH + pow(persons.get(i).getNodeDrawSize(), 1.3) );
+          }
+          // if there is repulsion remove it
+          if( existing_attraction >= 0) {
+            physics.removeAttraction( attractions.get(existing_attraction) );
+          }            
+        }
+        // otherwise disconnect them
+        else
+        {
+          // if repulsion doesn't exists create one
+          if( existing_attraction == -1 ) {
+            physics.makeAttraction( p1, p2, -SPACER_STRENGTH, 20 );
+          }
+          // if there is a spring remove it
+          if( existing_spring >= 0) {
+            physics.removeSpring( springs.get(existing_spring) );
+          }
+        }
+      }
+    }
+  }
+  
+ /* Get the springs connected to a particle
+  * 
+  */
+  private ArrayList<Spring> getSpringsConnected2Particle(Particle p) {
+    ArrayList<Spring> springs = new ArrayList();
+    for ( int l = 0; l < physics.numberOfSprings(); ++l )
+    {
+      Spring e = physics.getSpring( l );
+      if( e.getOneEnd() == p || e.getTheOtherEnd() == p)
+        springs.add(e);
+    }
+    return springs;
+  }
+  
+ /* Get the attractions connected to a particle
+  * 
+  */  
+  private ArrayList<Attraction> getAttractionsConnected2Particle(Particle p) {
+    ArrayList<Attraction> attractions = new ArrayList();
+    for ( int l = 0; l < physics.numberOfAttractions(); ++l )
+    {
+      Attraction e = physics.getAttraction( l );
+      if( e.getOneEnd() == p || e.getTheOtherEnd() == p)
+        attractions.add(e);
+    }
+    return attractions;
+  }
+  
   
  /* Delete a person from the network by its ID
   * 
@@ -176,10 +280,11 @@ class Network {
       for(int j = 0; j < gf.size(); ++j)
       {
         Person p = (Person)gf.get(j);
-        addPerson(p, id);
+        addPerson(p, id, false);
       }
     }
-		println("Network:updateFilters complete");
+    updateConnections();
+    println("Network:updateFilters complete");
     fm.makeClean();
   }
   
