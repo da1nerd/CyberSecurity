@@ -93,6 +93,8 @@ class Network {
   public void updateConnections() {
     
     println("update all connections");
+    
+    updateConnectionsBetweenBubbles();
    
     // go through all the persons
     for(int i = 0; i < persons.size(); ++i)
@@ -162,6 +164,7 @@ class Network {
             physics.removeAttraction( attractions.get(existing_attraction) );
           }            
         }
+        
         // otherwise disconnect them
         else
         {
@@ -217,6 +220,7 @@ class Network {
         break;
       }
     }
+    updateConnections();
   }
   
  /* Delete a person from the network
@@ -295,6 +299,7 @@ class Network {
         addPerson(p, id, false);
       }
     }
+    
     updateConnections();
     println("Network:updateFilters complete");
     fm.makeClean();
@@ -337,6 +342,61 @@ class Network {
     return -1;
   }
   
+    
+ /* Remove all the connections between the bubbles
+  * 
+  */
+  private void removeConnectionsBetweenBubbles() {
+    
+    for(int i = 0; i < persons.size(); ++i) {
+      Person p = persons.get(i);
+      removeConnections2OtherBubbles(p);
+    }
+  }
+  
+  private void updateConnectionsBetweenBubbles() {
+    for(int i = 0; i < persons.size(); ++i) {
+      Person p = persons.get(i);
+      if(p.selected) {
+        setConnections2OtherBubbles(p);
+      } else {
+        removeConnections2OtherBubbles(p);
+      }
+    }
+  }
+    
+ /* Set connections from one person the persons in other bubbles
+  * 
+  */
+  private void setConnections2OtherBubbles(Person p) {
+    for(int m = 0; m < p.getConnections().size(); ++m) {
+      int index = findPersonIndex( p.getConnections().get(m).getID() );
+      if( index >= 0) {
+        if( p.getBubbleID() != persons.get(index).getBubbleID() )
+          p.getConnections().get(m).setVisibility(true);
+      }
+    }  
+  }
+    
+ /* Remove connections from one person to the other bubbles
+  * 
+  */
+  private void removeConnections2OtherBubbles(Person p) {
+      for(int m = 0; m < p.getConnections().size(); ++m) {
+      int index = findPersonIndex( p.getConnections().get(m).getID() );
+      if( index >= 0) {
+        if( p.getBubbleID() != persons.get(index).getBubbleID() ) {
+          p.getConnections().get(m).setVisibility(false);
+          
+          for(int n = 0; n < persons.get(index).getConnections().size(); ++n) {
+            if( persons.get(index).getConnections().get(n).getID() == p.getID() ) {
+              persons.get(index).getConnections().get(n).setVisibility(false);
+            }
+          }
+        }
+      }
+    }
+  }
   
  /* Select a node
   * 
@@ -346,18 +406,7 @@ class Network {
     if(!ctrl)
     {
       resetSelection();
-      
-      // delete connections between bubbles
-      for(int i = 0; i < persons.size(); ++i) {
-        Person p = persons.get(i);
-        for(int m = 0; m < p.getConnections().size(); ++m) {
-          int index = findPersonIndex( p.getConnections().get(m).getID() );
-          if( index >= 0) {
-            if( p.getBubbleID() != persons.get(index).getBubbleID() )
-              p.getConnections().get(m).setVisibility(false);
-          }
-        }
-      }
+      //removeConnectionsBetweenBubbles();
     }
 
     int i = checkNodeHit(mx_raw, my_raw);
@@ -367,15 +416,7 @@ class Network {
       p.selected = true;
       persons.add(p);
       
-    
-      // set the connections to other bubbles
-      for(int m = 0; m < p.getConnections().size(); ++m) {
-        int index = findPersonIndex( p.getConnections().get(m).getID() );
-        if( index >= 0) {
-          if( p.getBubbleID() != persons.get(index).getBubbleID() )
-            p.getConnections().get(m).setVisibility(true);
-        }
-      } 
+      //setConnections2OtherBubbles(p);
     }
     updateConnections();
   }
@@ -421,8 +462,11 @@ class Network {
   * 
   */
   void resetSelection() {
-    for ( int i = 0; i < persons.size(); ++i )
-      ((Person)persons.get(i)).selected = false;
+    for ( int i = 0; i < persons.size(); ++i ) {
+      Person p = persons.get(i);
+      p.selected = false;
+      //removeConnections2OtherBubbles(p);
+    }
   }
 
   
