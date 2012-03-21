@@ -146,12 +146,18 @@ void keyPressed()
     ff.show();
     return;
   }
+  if ( key == 'm' )
+  {
+    ctrl_pressed = true;
+    return;
+  }
   if( key == DELETE)
   {
     network.deleteSelectedNodes(); 
   }
   if ( key == CODED ) {
     if ( keyCode == CONTROL ) {
+      println("control pressed");
       ctrl_pressed = true;
     } 
     if (keyCode == SHIFT ) {

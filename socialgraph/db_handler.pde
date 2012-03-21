@@ -29,6 +29,7 @@ class DBManager {
    */
   Boolean connect(String db_path, Boolean rebuild) {
     // open database connection
+    // db = new MySQL(parent, "mysql.neutrinographics.net", "demo", "demo12", "demo12");
     db = new MySQL(parent, "localhost", "socialgraph", "root", "");
     if ( db.connect() )
     {
